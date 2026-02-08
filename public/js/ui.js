@@ -125,16 +125,21 @@ export const startLiveTimerUpdates = () => {
     if (window.liveTimerInterval) {
         clearInterval(window.liveTimerInterval);
     }
-    
+
     window.liveTimerInterval = setInterval(() => {
-        const saleTimers = document.querySelectorAll('.product-timer.sale-timer .timer-countdown, .product-detail-timer.sale-timer .timer-display-large');
-        
+        const allTimers = document.querySelectorAll('.product-timer .timer-countdown, .product-detail-timer .timer-display-large');
         let hasActiveTimers = false;
 
-        saleTimers.forEach(el => {
-            const saleDate = el.closest('[data-sale-end-date]')?.dataset.saleEndDate;
-            if (saleDate) {
-                const timeLeft = calculateTimeRemaining(saleDate);
+        allTimers.forEach(el => {
+            const parent = el.closest('[data-sale-end-date], [data-combo-end-date]');
+            if (!parent) return;
+
+            const saleDate = parent.dataset.saleEndDate;
+            const comboDate = parent.dataset.comboEndDate;
+            const dateToUse = comboDate || saleDate; 
+
+            if (dateToUse) {
+                const timeLeft = calculateTimeRemaining(dateToUse);
                 if (timeLeft) {
                     el.textContent = timeLeft;
                     hasActiveTimers = true;
@@ -142,14 +147,8 @@ export const startLiveTimerUpdates = () => {
                     el.closest('.product-timer, .product-detail-timer').style.display = 'none';
                 }
             }
-
-            // Require at least one image (either URL or uploaded)
-            if (!productData.image) {
-                alert('Please provide a product image URL or upload at least one image.');
-                return;
-            }
         });
-        
+
         if (!hasActiveTimers) {
             clearInterval(window.liveTimerInterval);
         }
@@ -207,18 +206,22 @@ const createProductTags = (product, pageType) => {
 
 const createProductCard = (product) => {
     const isSoldOut = product.stock !== undefined && product.stock <= 0;
+    const isCombo = product.curatedPages && product.curatedPages.includes('combos');
+    const comboTimeLeft = isCombo ? calculateTimeRemaining(product.comboEndDate) : null;
     const saleTimeLeft = product.onSale ? calculateTimeRemaining(product.saleEndDate) : null;
     const savedAmount = product.oldPrice - product.currentPrice;
     
     let timerHTML = '';
     if (saleTimeLeft) {
         timerHTML += `<div class="product-timer sale-timer"><span class="timer-label">Sale Ends:</span> <span class="timer-countdown">${saleTimeLeft}</span></div>`;
+    } else if (comboTimeLeft) {
+        timerHTML += `<div class="product-timer sale-timer" style="background: linear-gradient(135deg, var(--corporate-blue), #2a7fec); border: 2px solid #4dabf7;"><span class="timer-label">Combo Ends:</span> <span class="timer-countdown">${comboTimeLeft}</span></div>`;
     }
     
     // Only show rating if there is at least one review linked to a viewer
     const viewerLinkedReviews = (product.reviews || []).filter(r => r.viewerId);
     return `
-        <a href="#product/${product.productId}" class="product-card" data-id="${product.productId}" data-sale-end-date="${product.saleEndDate || ''}">
+        <a href="#product/${product.productId}" class="product-card" data-id="${product.productId}" data-sale-end-date="${product.saleEndDate || ''}" data-combo-end-date="${product.comboEndDate || ''}">
             <div class="product-image">
                 ${createProductTags(product, 'card')}
                 ${timerHTML}
@@ -687,7 +690,9 @@ export const renderProductPage = async (product) => {
     const colorOptionsHTML = product.colorsEnabled && product.colors && product.colors.length > 0
         ? `<div class="color-options"><h4>Available Colors:</h4><div class="color-swatches">${product.colors.map((color, idx) => `<button type="button" class="color-swatch ${idx === 0 ? 'selected' : ''}" data-color="${color}" style="background-color: ${color.toLowerCase()};" title="${color}" aria-label="Select ${color} color"></button>`).join('')}</div></div>`
         : '';
-        
+    
+    const isCombo = product.curatedPages && product.curatedPages.includes('combos');
+    const comboTimeLeft = isCombo ? calculateTimeRemaining(product.comboEndDate) : null;
     const saleTimeLeft = product.onSale ? calculateTimeRemaining(product.saleEndDate) : null;
     
     let topBarTimerHTML = '';
@@ -697,15 +702,40 @@ export const renderProductPage = async (product) => {
                 <div class="timer-title"><i class="fas fa-fire"></i> Sale Ends:</div>
                 <div class="timer-display-large">${saleTimeLeft}</div>
             </div>`;
+    } else if (comboTimeLeft) {
+        topBarTimerHTML = `
+            <div class="product-detail-timer sale-timer" style="background: linear-gradient(135deg, var(--corporate-blue), #2a7fec); color: var(--white);">
+                <div class="timer-title"><i class="fas fa-star"></i> Combo Deal Ends:</div>
+                <div class="timer-display-large">${comboTimeLeft}</div>
+            </div>`;
     }
         
-    const giftReward = product.currentPrice * 0.05;
+    let giftRewardHTML = '';
+    if (product.giftCardEnabled && product.giftCardValue > 0) {
+        let rewardAmount = 0;
+        let rewardText = '';
+    
+        if (product.giftCardType === 'fixed') {
+            rewardAmount = product.giftCardValue;
+            rewardText = `<strong>${formatCurrency(rewardAmount)}</strong>`;
+        } else { // 'percent' is the other option and default
+            rewardAmount = (product.currentPrice * product.giftCardValue) / 100;
+            rewardText = `<strong>${formatCurrency(rewardAmount)}</strong> (${product.giftCardValue}%)`;
+        }
+    
+        if (rewardAmount > 0) {
+            giftRewardHTML = `
+                <div class="gift-reward">
+                    <p><i class="fas fa-gift"></i> Earn a ${rewardText} gift reward with this purchase to spend on your next purchase!</p>
+                </div>`;
+        }
+    }
     const savedAmount = (product.oldPrice || 0) - (product.currentPrice || 0);
     // Show original price and saved badge whenever oldPrice is greater than currentPrice
     const isActuallyOnSale = savedAmount > 0;
 
     appRoot.innerHTML = `
-    <div class="page-container product-page-container" data-sale-end-date="${product.saleEndDate || ''}">
+    <div class="page-container product-page-container" data-sale-end-date="${product.saleEndDate || ''}" data-combo-end-date="${product.comboEndDate || ''}">
         <div class="product-page-top-bar">
             <a href="#" class="back-to-products" id="back-to-products"><i class="fas fa-arrow-left"></i>&nbsp; Back</a>
             ${topBarTimerHTML}
@@ -727,9 +757,7 @@ export const renderProductPage = async (product) => {
                     ${isActuallyOnSale ? `<span class="original-price">${formatCurrency(product.oldPrice)}</span><span class="save-badge">Save ${formatCurrency(savedAmount)}</span>` : ''}
                 </div>
                 
-                 <div class="gift-reward">
-                    <p><i class="fas fa-gift"></i> Earn a <strong>${formatCurrency(giftReward)}</strong> gift reward with this purchase!</p>
-                </div>
+                ${giftRewardHTML}
                 
                 ${colorOptionsHTML}
 
@@ -1605,6 +1633,12 @@ export const renderAdminPage = (allProducts, allUsers, allViewers, allTransactio
                             ` : ''}
                         </div>
                         `}
+                        <div id="combo-expiry-section" style="display:none; margin-top:1.5rem; padding:1rem; background-color:#fffbe6; border-radius:8px; border-left: 4px solid var(--corporate-gold);">
+                            <div class="form-group">
+                                <label for="product-comboEndDate">Combo Sale End Date</label>
+                                <input type="datetime-local" id="product-comboEndDate">
+                            </div>
+                        </div>
                         <div id="combo-builder-section" class="admin-form" style="display:none; margin-top:1.5rem; padding:1.5rem; background-color:#eaf5ff; border-radius:12px; border-left: 4px solid var(--corporate-blue);">
                             <h3 style="margin-top:0; margin-bottom: 1rem; color: var(--corporate-blue);">Combo Product Builder</h3>
                             <p style="margin-top:0; margin-bottom:1rem; font-size: 0.9rem; color: #555;">Select up to 5 products to create a visual combo. The generated image will become this product's main image.</p>
@@ -1619,9 +1653,36 @@ export const renderAdminPage = (allProducts, allUsers, allViewers, allTransactio
                             </div>
                             <h4 style="margin-bottom: 0.5rem;">Generated Combo Image Preview:</h4>
                             <canvas id="combo-image-canvas" width="500" height="500" style="width: 250px; height: 250px; border: 2px dashed #ccc; background: #f9f9f9; border-radius: 8px;"></canvas>
-                            <div id="combo-total-display" style="display:none; margin-top:10px; font-weight:700;">Combo Total Price: <span id="combo-total-value">0</span></div>
+                            <div id="combo-total-display" style="margin-top:10px; font-weight:700;">Calculated Total (Old Price): N$<span id="combo-total-value">0</span></div>
+                            <div class="form-group" style="margin-top: 1rem;">
+                                <label for="product-comboSalePrice"><strong>Combo Sale Price (Current Price)</strong></label>
+                                <input type="number" id="product-comboSalePrice" required>
+                            </div>
                             <input type="hidden" id="combo-product-ids-hidden">
                         </div>
+                        ${isMainAdmin ? `
+                        <h3 style="margin-top: 1.5rem; margin-bottom: 1rem;">Rewards & Promotions</h3>
+                        <div class="form-grid">
+                           <div class="form-group">
+                               <label>Enable Gift Card Reward <input type="checkbox" id="product-giftCardEnabled" class="product-curate-toggle"></label>
+                           </div>
+                        </div>
+                        <div id="gift-card-config-section" style="display:none; margin-top:1rem; padding:1rem; background-color:#f0f7ff; border-radius:8px; border-left:4px solid var(--corporate-blue);">
+                           <div class="form-grid">
+                               <div class="form-group">
+                                   <label for="product-giftCardType">Reward Type</label>
+                                   <select id="product-giftCardType">
+                                       <option value="percent">Percentage</option>
+                                       <option value="fixed">Fixed Amount</option>
+                                   </select>
+                               </div>
+                               <div class="form-group">
+                                   <label for="product-giftCardValue" id="gift-card-value-label">Value (%)</label>
+                                   <input type="number" id="product-giftCardValue" value="5" min="0" step="0.01">
+                               </div>
+                           </div>
+                        </div>
+                        ` : ''}
                         <div id="product-validation-msg" style="color:#b71c1c; margin:8px 0; display:none; font-weight:600;"></div>
                         <button id="product-save-btn" type="submit" class="btn btn-primary">Save Product</button>
                         <button type="reset" id="clear-form-btn" class="btn btn-outline">Clear Form</button>
@@ -1812,13 +1873,21 @@ const attachAdminEventListeners = (isMainAdmin, allProducts, relevantTransaction
         const validationMsg = document.getElementById('product-validation-msg');
         if (validationMsg) { validationMsg.textContent = ''; validationMsg.style.display = 'none'; }
         
-        // Reset combo builder
+        // Reset combo builder and expiry
         const comboToggle = document.getElementById('product-curate-combos');
+        const comboExpirySection = document.getElementById('combo-expiry-section');
+        const comboSalePriceInput = document.getElementById('product-comboSalePrice');
         if (comboToggle) {
             comboToggle.checked = false;
-            // Trigger change event to hide the section and clear data
             comboToggle.dispatchEvent(new Event('change'));
         }
+        if (comboSalePriceInput) comboSalePriceInput.value = '';
+        // Reset gift card section
+        const giftCardToggle = document.getElementById('product-giftCardEnabled');
+        const giftCardConfigSection = document.getElementById('gift-card-config-section');
+        if(giftCardToggle) giftCardToggle.checked = false;
+        if(giftCardConfigSection) giftCardConfigSection.style.display = 'none';
+
 
         formInteracted = false; // Reset interaction flag
     };
@@ -2316,15 +2385,18 @@ const attachAdminEventListeners = (isMainAdmin, allProducts, relevantTransaction
     document.getElementById('clear-form-btn')?.addEventListener('click', updateSaveButtonState);
     document.getElementById('cancel-edit-btn')?.addEventListener('click', updateSaveButtonState);
     
-    // --- Combo Builder Logic ---
+    // --- Combo Builder & Expiry Logic ---
     const comboToggle = document.getElementById('product-curate-combos');
     const comboBuilderSection = document.getElementById('combo-builder-section');
+    const comboExpirySection = document.getElementById('combo-expiry-section');
     const comboProductList = document.getElementById('combo-product-list');
     const comboProductSearch = document.getElementById('combo-product-search');
     const comboSelectedCount = document.getElementById('combo-selected-count');
     const comboSelectedPreview = document.getElementById('combo-selected-preview');
     const comboCanvas = document.getElementById('combo-image-canvas');
     const comboProductIdsHidden = document.getElementById('combo-product-ids-hidden');
+    const comboEndDateInput = document.getElementById('product-comboEndDate');
+
 
     const populateComboProductList = (filter = '') => {
         if (!comboProductList) return;
@@ -2361,7 +2433,6 @@ const attachAdminEventListeners = (isMainAdmin, allProducts, relevantTransaction
         `).join('');
 
         // Update combo total price display
-        const comboTotalDisplay = document.getElementById('combo-total-display');
         const comboTotalValue = document.getElementById('combo-total-value');
         const total = selectedComboProducts.reduce((sum, p) => sum + (parseFloat(p.currentPrice) || 0), 0);
         if (comboTotalValue) comboTotalValue.textContent = total.toFixed(2);
@@ -2463,6 +2534,9 @@ const attachAdminEventListeners = (isMainAdmin, allProducts, relevantTransaction
     const setComboUIState = (enabled) => {
         // Show/hide the combo builder section
         if (comboBuilderSection) comboBuilderSection.style.display = enabled ? 'block' : 'none';
+        if (comboExpirySection) comboExpirySection.style.display = enabled ? 'block' : 'none';
+        if (comboEndDateInput) comboEndDateInput.required = enabled;
+
 
         // Price and image inputs - hide when combo is enabled
         const priceGroup = document.getElementById('product-currentPrice')?.closest('.form-group');
@@ -2470,14 +2544,15 @@ const attachAdminEventListeners = (isMainAdmin, allProducts, relevantTransaction
         const imageGroup = document.getElementById('product-image')?.closest('.form-group');
         const imagesUploadGroup = document.getElementById('product-images')?.closest('.form-group');
         const imagesPreviewEl = document.getElementById('product-images-preview');
-        const comboTotalDisplay = document.getElementById('combo-total-display');
+        const comboSalePriceInput = document.getElementById('product-comboSalePrice')?.closest('.form-group');
+
 
         if (priceGroup) priceGroup.style.display = enabled ? 'none' : 'block';
         if (oldPriceGroup) oldPriceGroup.style.display = enabled ? 'none' : 'block';
         if (imageGroup) imageGroup.style.display = enabled ? 'none' : 'block';
         if (imagesUploadGroup) imagesUploadGroup.style.display = enabled ? 'none' : 'block';
         if (imagesPreviewEl) imagesPreviewEl.style.display = enabled ? 'none' : '';
-        if (comboTotalDisplay) comboTotalDisplay.style.display = enabled ? 'block' : 'none';
+        if (comboSalePriceInput) comboSalePriceInput.style.display = enabled ? 'block' : 'none';
 
         // Also toggle the 'required' attribute on inputs so browser constraint validation doesn't block when hidden
         const currentPriceInput = document.getElementById('product-currentPrice');
@@ -2496,6 +2571,7 @@ const attachAdminEventListeners = (isMainAdmin, allProducts, relevantTransaction
                 populateComboProductList();
             } else {
                 selectedComboProducts = [];
+                if (comboEndDateInput) comboEndDateInput.value = '';
                 updateComboSelectionDisplay();
                 generateAndDisplayComboImage();
             }
@@ -2576,6 +2652,22 @@ const attachAdminEventListeners = (isMainAdmin, allProducts, relevantTransaction
                 updateComboSelectionDisplay();
                 generateAndDisplayComboImage();
             }
+        });
+    }
+
+    // --- Gift Card Logic (Main Admin Only) ---
+    const giftCardToggle = document.getElementById('product-giftCardEnabled');
+    const giftCardConfigSection = document.getElementById('gift-card-config-section');
+    const giftCardTypeSelect = document.getElementById('product-giftCardType');
+    const giftCardValueLabel = document.getElementById('gift-card-value-label');
+    
+    if (isMainAdmin && giftCardToggle && giftCardConfigSection && giftCardTypeSelect && giftCardValueLabel) {
+        giftCardToggle.addEventListener('change', (e) => {
+            giftCardConfigSection.style.display = e.target.checked ? 'block' : 'none';
+        });
+
+        giftCardTypeSelect.addEventListener('change', (e) => {
+            giftCardValueLabel.textContent = e.target.value === 'percent' ? 'Value (%)' : 'Value (N$)';
         });
     }
 
@@ -2676,6 +2768,14 @@ const attachAdminEventListeners = (isMainAdmin, allProducts, relevantTransaction
                                     if (combosToggle) {
                                         combosToggle.checked = curatedPages.includes('combos');
                                         combosToggle.dispatchEvent(new Event('change'));
+
+                                        if (curatedPages.includes('combos')) {
+                                            document.getElementById('product-comboSalePrice').value = productToEdit.currentPrice;
+                                        }
+
+                                        if (productToEdit.comboEndDate) {
+                                           document.getElementById('product-comboEndDate').value = new Date(productToEdit.comboEndDate).toISOString().slice(0, 16);
+                                        }
                                         // If this product already has comboProductIds, populate selection and update UI
                                         if (productToEdit.comboProductIds && Array.isArray(productToEdit.comboProductIds) && productToEdit.comboProductIds.length > 0) {
                                             selectedComboProducts = productToEdit.comboProductIds.map(pid => allProducts.find(p => p.productId === pid)).filter(Boolean);
@@ -2772,6 +2872,22 @@ const attachAdminEventListeners = (isMainAdmin, allProducts, relevantTransaction
                             featuresContainer.appendChild(featureDiv);
                         });
                     }
+                    // Populate Gift Card fields if main admin
+                    if (isMainAdmin) {
+                        const giftCardEnabledToggle = document.getElementById('product-giftCardEnabled');
+                        const giftCardConfig = document.getElementById('gift-card-config-section');
+                        const giftCardType = document.getElementById('product-giftCardType');
+                        const giftCardValue = document.getElementById('product-giftCardValue');
+
+                        giftCardEnabledToggle.checked = productToEdit.giftCardEnabled || false;
+                        giftCardConfig.style.display = giftCardEnabledToggle.checked ? 'block' : 'none';
+                        if (productToEdit.giftCardEnabled) {
+                            giftCardType.value = productToEdit.giftCardType || 'percent';
+                            giftCardValue.value = productToEdit.giftCardValue || 5;
+                            giftCardType.dispatchEvent(new Event('change'));
+                        }
+                    }
+
                     
                     // Update save button state after populating
                     try { updateSaveButtonState(); } catch (err) {}
@@ -2853,6 +2969,16 @@ const attachAdminEventListeners = (isMainAdmin, allProducts, relevantTransaction
                 return;
             }
         }
+
+        // Validate combo expiry date if combo is selected
+        const isCombo = document.getElementById('product-curate-combos')?.checked;
+        const comboEndDateValue = document.getElementById('product-comboEndDate')?.value;
+        if (isCombo && !comboEndDateValue) {
+            alert('Please set a sale end date for the Super Combo.');
+            document.getElementById('product-comboEndDate')?.focus();
+            return;
+        }
+
         // Main admin or kids admin with curated page selected: proceed with save
         console.log('Validation passed, proceeding with save');
         const stockToggle = document.getElementById('product-stockToggle');
@@ -2860,9 +2986,8 @@ const attachAdminEventListeners = (isMainAdmin, allProducts, relevantTransaction
         // Validate required fields (image may be provided via file upload)
         const productId = document.getElementById('product-id').value.trim();
         const title = document.getElementById('product-title').value.trim();
-        const isCombo = document.getElementById('product-curate-combos')?.checked;
-        let currentPrice = document.getElementById('product-currentPrice').value;
-        let oldPrice = document.getElementById('product-oldPrice').value;
+        let currentPrice;
+        let oldPrice;
         const category = document.getElementById('product-category').value.trim();
         let image = document.getElementById('product-image').value.trim();
 
@@ -2873,8 +2998,16 @@ const attachAdminEventListeners = (isMainAdmin, allProducts, relevantTransaction
                 return;
             }
             const total = selectedComboProducts.reduce((sum, p) => sum + (parseFloat(p.currentPrice) || 0), 0);
-            currentPrice = total;
             oldPrice = total;
+            currentPrice = document.getElementById('product-comboSalePrice').value;
+
+            if (!currentPrice) {
+                alert('Please set a Sale Price for the Super Combo.');
+                return;
+            }
+        } else {
+            currentPrice = document.getElementById('product-currentPrice').value;
+            oldPrice = document.getElementById('product-oldPrice').value;
         }
 
         if (!productId || !title || (!isCombo && (!currentPrice || !oldPrice)) || !category) {
@@ -2936,12 +3069,23 @@ const attachAdminEventListeners = (isMainAdmin, allProducts, relevantTransaction
                 document.getElementById('product-color-3')?.value.trim() || null,
             ].filter(c => c !== null)),
             colorsEnabled: document.getElementById('enable-product-colors')?.checked ?? true,
+            comboEndDate: isCombo && comboEndDateValue ? new Date(comboEndDateValue) : undefined,
         };
+        
+        // Add Gift Card data if main admin
+        if(isMainAdmin) {
+            const giftCardEnabled = document.getElementById('product-giftCardEnabled')?.checked;
+            productData.giftCardEnabled = giftCardEnabled;
+            if(giftCardEnabled) {
+                productData.giftCardType = document.getElementById('product-giftCardType')?.value || 'percent';
+                productData.giftCardValue = parseFloat(document.getElementById('product-giftCardValue')?.value) || 0;
+            }
+        }
+
 
         const hiddenId = document.getElementById('product-id-hidden').value;
         try {
             let filesToUpload = [];
-            const isCombo = document.getElementById('product-curate-combos')?.checked;
 
             if (isCombo) {
                 if (selectedComboProducts.length === 0) {
