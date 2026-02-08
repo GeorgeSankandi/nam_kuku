@@ -1,0 +1,32 @@
+// utils/categoryData.js
+
+export const categoryData = {
+    'phones': { name: 'Phones', heroImage: 'https://images.unsplash.com/photo-1601784551446-20c9e07cdbf1?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80', subcategories: ['iphones', 'samsung-phones'] },
+    'iphones': { name: 'iPhones', heroImage: 'https://images.unsplash.com/photo-1510557880182-3d4d3cba35a5?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80' },
+    'samsung-phones': { name: 'Samsung Phones', heroImage: 'https://images.unsplash.com/photo-1610945415295-d9bbf067e59c?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80' },
+    'tablets': { name: 'Tablets', heroImage: 'https://images.unsplash.com/photo-1561152044-723469344474?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80', subcategories: ['ipads', 'samsung-tabs', 'lenovo-tabs'] },
+    'ipads': { name: 'iPads', heroImage: 'https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80' },
+    'samsung-tabs': { name: 'Samsung Tabs', heroImage: 'https://images.unsplash.com/photo-1607839396729-bab2a0619a69?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80' },
+    'lenovo-tabs': { name: 'Lenovo/Android Tabs', heroImage: 'https://images.unsplash.com/photo-1518770660439-4636190af475?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80' },
+    'laptops': { name: 'Laptops', heroImage: 'https://images.unsplash.com/photo-1496181133206-80ce9b88a853?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80', subcategories: ['macbooks', 'dell-laptops', 'hp-laptops'] },
+    'macbooks': { name: 'MacBooks', heroImage: 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80' },
+    'dell-laptops': { name: 'Dell Laptops', heroImage: 'https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80' },
+    'hp-laptops': { name: 'HP Laptops', heroImage: 'https://images.unsplash.com/photo-1531297484001-80022131f5a1?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80' },
+    'computers': { name: 'Computers & iMacs', heroImage: 'https://images.unsplash.com/photo-1517057011413-50de3b66440f?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80', subcategories: ['imacs', 'hp-aio'] },
+    'imacs': { name: 'iMacs', heroImage: 'https://images.unsplash.com/photo-1527443154391-507e9dc6c5cc?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80' },
+    'hp-aio': { name: 'HP All-in-One', heroImage: 'https://images.unsplash.com/photo-1616353033707-23c8e5c7b1f8?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80' },
+    'gaming': { name: 'Gaming', heroImage: 'https://images.unsplash.com/photo-1550745165-9bc0b252726a?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80', subcategories: ['playstation', 'xbox', 'gaming-accessories'] },
+    'playstation': { name: 'PlayStation', heroImage: 'https://images.unsplash.com/photo-1606144042614-b2417e99c4e3?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80' },
+    'xbox': { name: 'Xbox', heroImage: 'https://images.unsplash.com/photo-1627885824424-a481c4ea2105?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80' },
+    'gaming-accessories': { name: 'Gaming Accessories', heroImage: 'https://images.unsplash.com/photo-1593305841991-05c297ba4575?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80' },
+    'trending': { name: 'Trending Now', heroImage: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80' },
+    'new-arrivals': { name: 'New Arrivals', heroImage: 'https://images.unsplash.com/photo-1546054454-aa26e2b734c7?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80' },
+    'on-sale': { name: 'On Sale', heroImage: 'https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80' },
+    'trade-in': { name: 'Trade-In Your Device', heroImage: 'https://images.unsplash.com/photo-1579934200670-35a01533d308?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80' },
+    'second-hand': { name: 'Second-Hand Devices', heroImage: 'https://images.unsplash.com/photo-1598327105666-658454354c03?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80' },
+    'combos': { name: 'Super Combos', heroImage: 'https://images.unsplash.com/photo-1572594691920-87d1b7b7a8a0?auto=format&fit=crop&w=800&q=60' },
+    'clothing': { name: 'Clothing', heroImage: 'https://images.unsplash.com/photo-1489987707025-afc232f7ea0f?auto=format&fit=crop&w=1350&q=80' },
+    'kids': { name: 'For Kids', heroImage: 'https://images.unsplash.com/photo-1546830138-23c24b17983e?auto=format&fit=crop&w=1350&q=80', subcategories: ['kids-tech', 'educational'] },
+    'kids-tech': { name: 'Kids Tech', heroImage: 'https://images.unsplash.com/photo-1605511384738-92760a7e034e?auto=format&fit=crop&w=1350&q=80' },
+    'educational': { name: 'Educational Fun', heroImage: 'https://images.unsplash.com/photo-1588196749107-1a4a0f44a864?auto=format&fit=crop&w=1350&q=80' }
+};
