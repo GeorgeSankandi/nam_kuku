@@ -22,10 +22,12 @@ const getAdminInfo = () => {
 // Checks if an admin/seller is logged in
 export const isLoggedIn = () => {
     const userInfo = getAdminInfo();
-    // Direct admin user
-    if (userInfo && userInfo.isAdmin === true) return true;
-    // Allow main admin to impersonate a seller: if main admin info is stored in sessionStorage,
-    // we consider the admin area accessible even if the current local user isn't an admin.
+    // A user is considered an "admin" for dashboard access if they have the isAdmin flag
+    // OR if their sellerType is not 'customer'.
+    if (userInfo && (userInfo.isAdmin === true || (userInfo.sellerType && userInfo.sellerType !== 'customer'))) {
+        return true;
+    }
+    // Allow main admin to impersonate a seller
     if (sessionStorage.getItem('mainAdminInfo')) return true;
     return false;
 };
@@ -93,12 +95,13 @@ export const login = async (email, password) => {
         const data = await response.json();
         const userInfo = data.user || data;
 
-        // Only allow admin users to access admin panel
-        if (!userInfo.isAdmin) {
-            throw new Error('Only admin users can access the admin panel');
+        // Allow main admins OR any type of seller to access the admin panel.
+        // Block only regular 'customer' accounts.
+        if (!userInfo.isAdmin && (!userInfo.sellerType || userInfo.sellerType === 'customer')) {
+            throw new Error('Only admin or seller accounts can access the admin panel.');
         }
 
-        // Store minimal user info in localStorage (no JWT token)
+        // Store user info in localStorage
         localStorage.setItem('userInfo', JSON.stringify(userInfo));
         return true;
     } catch (error) {
@@ -110,6 +113,8 @@ export const login = async (email, password) => {
 // Logs the admin out
 export const logout = () => {
     localStorage.removeItem('userInfo');
+    sessionStorage.removeItem('mainAdminInfo'); // Also clear impersonation state
     // Redirect to home page after logout
     location.hash = '#home';
+    location.reload(); // Force a full reload to clear all state
 };

@@ -1,6 +1,6 @@
 import Product from '../models/productModel.js';
 import mongoose from 'mongoose';
-import { verifyProduct, generateDescriptionAndFeatures } from '../utils/aiService.js';
+import { generateDescriptionWithGemini, generateFeaturesWithGemini } from '../utils/geminiService.js';
 
 // @desc    Fetch all products or search by keyword/category/curated page
 // @route   GET /api/products
@@ -9,17 +9,13 @@ const getProducts = async (req, res) => {
   let query = {};
 
   if (keyword) {
-    query.title = {
-      $regex: keyword,
-      $options: 'i', // case-insensitive
-    };
+    query.title = { $regex: keyword, $options: 'i' };
   }
   
   if (category) {
     const categories = category.split(',').map(c => c.trim()).filter(Boolean);
     const lowerCats = categories.map(c => c.toLowerCase());
 
-    // Category filtering logic (preserved from original)
     if (lowerCats.includes('womens-clothes') || lowerCats.includes('womens-clothing')) {
       query.curatedPages = { $in: ['womens-clothes'] };
     } else if (lowerCats.includes('mens-clothes') || lowerCats.includes('mens-clothing')) {
@@ -30,9 +26,7 @@ const getProducts = async (req, res) => {
       if (lowerCats.includes('bedroom')) furnitureSlugs.push('bedroom');
       if (lowerCats.includes('office')) furnitureSlugs.push('office');
       if (lowerCats.includes('kitchen')) furnitureSlugs.push('kitchen');
-      if (furnitureSlugs.length) {
-        query.curatedPages = { $in: furnitureSlugs };
-      }
+      if (furnitureSlugs.length) query.curatedPages = { $in: furnitureSlugs };
     } else if (lowerCats.includes('furniture') || lowerCats.includes('furnitures')) {
       query.$or = [
         { category: { $in: [/^furniture$/i, /^furnitures$/i] } },
@@ -43,9 +37,7 @@ const getProducts = async (req, res) => {
       if (lowerCats.includes('kids-electronics')) kidsSlugs.push('kids-electronics');
       if (lowerCats.includes('kids-clothing')) kidsSlugs.push('kids-clothing');
       if (lowerCats.includes('kids-toys')) kidsSlugs.push('kids-toys');
-      if (kidsSlugs.length) {
-        query.curatedPages = { $in: kidsSlugs };
-      }
+      if (kidsSlugs.length) query.curatedPages = { $in: kidsSlugs };
     } else if (lowerCats.includes('kids')) {
       query.$or = [
         { category: { $in: [/^kids$/i] } },
@@ -53,8 +45,7 @@ const getProducts = async (req, res) => {
       ];
     } else {
       const clothesAliases = ['clothes','clothing'];
-      const isClothesQuery = lowerCats.some(c => clothesAliases.includes(c));
-      if (isClothesQuery) {
+      if (lowerCats.some(c => clothesAliases.includes(c))) {
         query.$or = [
           { category: { $in: [/^clothes$/i, /^clothing$/i] } },
           { curatedPages: { $in: ['womens-clothes','mens-clothes'] } }
@@ -66,9 +57,7 @@ const getProducts = async (req, res) => {
     }
   }
 
-  if (curated) {
-    query.curatedPages = curated;
-  }
+  if (curated) query.curatedPages = curated;
 
   try {
     const products = await Product.find(query);
@@ -88,12 +77,8 @@ const getProductById = async (req, res) => {
          product = await Product.findById(req.params.id);
        }
     }
-    
-    if (product) {
-      res.json(product);
-    } else {
-      res.status(404).json({ message: 'Product not found' });
-    }
+    if (product) res.json(product);
+    else res.status(404).json({ message: 'Product not found' });
   } catch (error) {
      res.status(500).json({ message: 'Server Error' });
   }
@@ -105,32 +90,22 @@ const createProduct = async (req, res) => {
     try {
         const isMainAdmin = req.user && req.user.isAdmin === true;
 
+        // If main admin, handle AI generation for description and features
         if (isMainAdmin) {
-            const tempProduct = {
-                title: req.body.title,
-                description: req.body.description,
-                category: req.body.category,
-                currentPrice: req.body.currentPrice,
-                oldPrice: req.body.oldPrice,
-                image: req.body.image,
-                features: req.body.features || []
-            };
-
             try {
-                console.log('Verifying product...');
-                const verification = await verifyProduct(tempProduct);
-                if (!verification.verified) {
-                    return res.status(400).json({ 
-                        message: 'Product failed verification', 
-                        reason: verification.reason 
-                    });
+                // Generate description if missing
+                if (!req.body.description || req.body.description.trim() === '') {
+                    console.log('Server: Generating unique description for', req.body.title);
+                    req.body.description = await generateDescriptionWithGemini(req.body.title, req.body.features || []);
                 }
-                console.log('Generating description and features...');
-                const generated = await generateDescriptionAndFeatures(tempProduct);
-                req.body.description = generated.description;
-                req.body.features = generated.features;
+                
+                // Generate features if missing
+                if (!req.body.features || req.body.features.length === 0) {
+                    console.log('Server: Generating unique features for', req.body.title);
+                    req.body.features = await generateFeaturesWithGemini(req.body.title);
+                }
             } catch (aiError) {
-                console.warn('Continuing product creation without AI enhancements');
+                console.warn('Continuing product creation without AI enhancements', aiError.message);
             }
         }
 
@@ -155,13 +130,13 @@ const createProduct = async (req, res) => {
             condition: req.body.condition,
             colors: req.body.colors,
             colorsEnabled: req.body.colorsEnabled,
+            sizes: req.body.sizes,
             thumbnails: req.body.thumbnails,
             features: req.body.features,
             onSale: req.body.onSale,
             saleStartDate: req.body.saleStartDate,
             saleEndDate: req.body.saleEndDate,
             curatedPages: req.body.curatedPages,
-            // New fields
             comboEndDate: req.body.comboEndDate,
             comboProductIds: req.body.comboProductIds,
             giftCardEnabled: req.body.giftCardEnabled,
@@ -192,9 +167,7 @@ const updateProduct = async (req, res) => {
       runValidators: true,
     });
 
-    if (!product) {
-      return res.status(404).json({ message: 'Product not found' });
-    }
+    if (!product) return res.status(404).json({ message: 'Product not found' });
     res.json(product);
   } catch (error) {
     console.error('Error updating product', error);
@@ -207,9 +180,7 @@ const updateProduct = async (req, res) => {
 const deleteProduct = async (req, res) => {
   try {
     const product = await Product.findByIdAndDelete(req.params.id);
-    if (!product) {
-      return res.status(404).json({ message: 'Product not found' });
-    }
+    if (!product) return res.status(404).json({ message: 'Product not found' });
     res.json({ message: 'Product removed' });
   } catch (error) {
     console.error('Error deleting product', error);
@@ -222,26 +193,21 @@ const deleteProduct = async (req, res) => {
 const addViewer = async (req, res) => {
     try {
         const product = await Product.findOne({ productId: req.params.productId });
-        if (!product) {
-            return res.status(404).json({ message: 'Product not found' });
+        if (!product) return res.status(404).json({ message: 'Product not found' });
+        
+        const { name, viewTime } = req.body || {};
+        let viewedAt = new Date();
+        if (viewTime && typeof viewTime === 'object' && typeof viewTime.hour === 'number') {
+          viewedAt = new Date();
+          viewedAt.setHours(viewTime.hour, viewTime.minute || 0, 0, 0);
         }
-    const { name, viewTime } = req.body || {};
-    let viewedAt = new Date();
-    if (viewTime && typeof viewTime === 'object' && typeof viewTime.hour === 'number') {
-      viewedAt = new Date();
-      viewedAt.setHours(viewTime.hour, viewTime.minute || 0, 0, 0);
-    }
-    
-    const newViewerData = { viewedAt, name: name || undefined, addedByAdmin: !!name };
-    product.viewers.push(newViewerData);
+        
+        const newViewerData = { viewedAt, name: name || undefined, addedByAdmin: !!name };
+        product.viewers.push(newViewerData);
         await product.save();
 
-    const savedViewer = product.viewers[product.viewers.length - 1];
-
-        res.status(201).json({ 
-            viewerCount: product.viewers.length,
-            viewer: savedViewer
-        });
+        const savedViewer = product.viewers[product.viewers.length - 1];
+        res.status(201).json({ viewerCount: product.viewers.length, viewer: savedViewer });
     } catch (error) {
         res.status(500).json({ message: 'Server Error' });
     }
@@ -259,7 +225,6 @@ const addReview = async (req, res) => {
     if (!product) return res.status(404).json({ message: 'Product not found' });
 
     product.reviews.push({ author, rating: Number(rating), text, viewerId });
-
     product.reviewCount = product.reviews.length;
     const sum = product.reviews.reduce((acc, r) => acc + (r.rating || 0), 0);
     product.rating = product.reviews.length ? (sum / product.reviews.length) : 0;
@@ -287,9 +252,7 @@ const getAllViewers = async (req, res) => {
 const getViewersByProductId = async (req, res) => {
     try {
         const product = await Product.findOne({ productId: req.params.productId });
-        if (!product) {
-            return res.status(404).json({ message: 'Product not found' });
-        }
+        if (!product) return res.status(404).json({ message: 'Product not found' });
         res.json({ viewerCount: product.viewers.length, viewers: product.viewers });
     } catch (error) {
         res.status(500).json({ message: 'Server Error' });
@@ -301,9 +264,7 @@ const getViewersByProductId = async (req, res) => {
 const deleteViewer = async (req, res) => {
     try {
         const product = await Product.findById(req.params.productId);
-        if (!product) {
-            return res.status(404).json({ message: 'Product not found' });
-        }
+        if (!product) return res.status(404).json({ message: 'Product not found' });
         product.viewers.pull({ _id: req.params.viewerId });
         await product.save();
         res.json({ message: 'Viewer removed' });
@@ -313,14 +274,6 @@ const deleteViewer = async (req, res) => {
 };
 
 export { 
-    getProducts, 
-    getProductById, 
-    createProduct, 
-    updateProduct, 
-    deleteProduct,
-    addViewer,
-    getViewersByProductId,
-    getAllViewers,
-    deleteViewer,
-    addReview
+    getProducts, getProductById, createProduct, updateProduct, deleteProduct,
+    addViewer, getViewersByProductId, getAllViewers, deleteViewer, addReview
 };

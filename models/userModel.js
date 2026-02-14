@@ -15,7 +15,6 @@ const userSchema = mongoose.Schema({
     type: String,
     required: true,
   },
-  // ** THIS IS THE CRITICAL FIX **
   isAdmin: {
     type: Boolean,
     required: true,
@@ -23,7 +22,14 @@ const userSchema = mongoose.Schema({
   },
   sellerType: {
     type: String,
+    enum: ['customer', 'admin', 'clothes', 'furniture', 'kids'],
     default: 'customer',
+  },
+  // New field to control login access
+  isApproved: {
+    type: Boolean,
+    required: true,
+    default: true, // Customers are auto-approved
   },
   resetPasswordToken: { type: String },
   resetPasswordExpires: { type: Date },
@@ -36,13 +42,10 @@ userSchema.methods.matchPassword = async function (enteredPassword) {
   return await bcrypt.compare(enteredPassword, this.password);
 };
 
-// Middleware to run before saving a user document
 userSchema.pre('save', async function (next) {
-  // Only hash the password if it has been modified (or is new)
   if (!this.isModified('password')) {
     next();
   }
-
   const salt = await bcrypt.genSalt(10);
   this.password = await bcrypt.hash(this.password, salt);
 });

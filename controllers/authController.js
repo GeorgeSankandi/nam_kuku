@@ -3,15 +3,43 @@ import User from '../models/userModel.js';
 
 // Sign up and log in the user via session
 const signup = async (req, res) => {
-  const { name, email, password } = req.body;
+  const { name, email, password, sellerType } = req.body;
+  
   try {
     const existing = await User.findOne({ email });
     if (existing) return res.status(400).json({ message: 'User already exists' });
-    const user = await User.create({ name, email, password });
-    // Log user in via req.login
+
+    // Sanitize seller type
+    let userSellerType = 'customer';
+    let isApproved = true;
+
+    // Only allow specific reseller types to be requested
+    if (['clothes', 'furniture', 'kids'].includes(sellerType)) {
+      userSellerType = sellerType;
+      isApproved = false; // Resellers require approval
+    }
+
+    const user = await User.create({ 
+      name, 
+      email, 
+      password,
+      sellerType: userSellerType,
+      isApproved: isApproved
+    });
+
+    // If it's a reseller, do not log them in immediately.
+    if (!isApproved) {
+      return res.json({ 
+        message: 'Signup successful. Your reseller account is pending approval by an admin.',
+        user: null,
+        pendingApproval: true
+      });
+    }
+
+    // Log customer in immediately
     req.login(user, (err) => {
       if (err) return res.status(500).json({ message: 'Signup error' });
-      return res.json({ message: 'Signed up', user: { _id: user._id, name: user.name, email: user.email } });
+      return res.json({ message: 'Signed up', user: { _id: user._id, name: user.name, email: user.email, sellerType: user.sellerType } });
     });
   } catch (err) {
     console.error(err);
@@ -20,14 +48,12 @@ const signup = async (req, res) => {
 };
 
 const logout = (req, res) => {
-  // Destroy session directly without req.logout() to avoid Passport's regenerate call on a destroyed session
   req.session.destroy((err) => {
     res.clearCookie('connect.sid');
     res.json({ message: 'Logged out' });
   });
 };
 
-// Request password reset: generate token and (placeholder) send email
 const forgotPassword = async (req, res) => {
   const { email } = req.body;
   try {
@@ -37,7 +63,6 @@ const forgotPassword = async (req, res) => {
     user.resetPasswordToken = token;
     user.resetPasswordExpires = Date.now() + 3600000; // 1 hour
     await user.save();
-    // TODO: send email with reset link. For now, return token so caller can inspect.
     console.log(`Password reset token for ${email}: ${token}`);
     res.json({ message: 'Reset token generated', token });
   } catch (err) {
@@ -46,7 +71,6 @@ const forgotPassword = async (req, res) => {
   }
 };
 
-// Verify token and reset password
 const resetPassword = async (req, res) => {
   const { token } = req.params;
   const { password } = req.body;

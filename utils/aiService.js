@@ -19,7 +19,7 @@ const callChat = async (messages, model = 'gpt-3.5-turbo') => {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${OPENAI_KEY}`
     },
-    body: JSON.stringify({ model, messages, temperature: 0.2, max_tokens: 1200 })
+    body: JSON.stringify({ model, messages, temperature: 0.7, max_tokens: 1200 }) // Increased temperature for uniqueness
   });
   if (!res.ok) {
     const txt = await res.text();
@@ -138,79 +138,27 @@ export const generateDescriptionAndFeatures = async (product) => {
   }
 
   // Generate category-specific prompts for better results
-  let systemPrompt = 'You are a product copywriter with access to comprehensive product databases. Produce a short marketing description (1-2 sentences) and a concise features list (4-6 bullet points). Return only JSON with keys {description: string, features: string[] }. IMPORTANT: Generate ACCURATE, VERIFIED product specifications based on actual product data, not generic descriptions.';
-  let userPrompt = `Product JSON:\n${JSON.stringify(product, null, 2)}\n\nGenerate a short, factual product description and 4-6 concise features suitable for the product detail page. Avoid superlatives unless justified. Return JSON.`;
+  let systemPrompt = 'You are a professional product copywriter. Write a UNIQUE, distinct, and compelling marketing description (2-3 sentences) specifically for this product. Do not use generic templates. Also provide 4-6 concise technical features. Return only JSON with keys {description: string, features: string[] }.';
+  
+  let userPrompt = `Product JSON:\n${JSON.stringify(product, null, 2)}\n\nGenerate a UNIQUE, factual product description and 4-6 concise features suitable for the product detail page. The description must be distinct and specific to this exact model. Avoid generic phrases like "Experience the best". Focus on what makes this specific item special. Return JSON.`;
 
   if (shouldGenerateAI) {
     // Add web search context if available
     const webContext = webSearchResults ? `\n\nWeb Research Context:\n${webSearchResults}` : '';
     
-    if (webContext) {
-      console.log('✓ Web search context will be included in AI prompt for enhanced accuracy');
-    } else {
-      console.log('ℹ No web search context available, proceeding with category-specific AI prompt');
-    }
-    
     // Category-specific prompts for tech products
     if (category.includes('phone') || category.includes('iphone') || category.includes('samsung')) {
-      systemPrompt = 'You are a smartphone expert with access to official product specifications and reviews. Your task is to generate ACCURATE technical descriptions with VERIFIED specifications. Produce a 1-2 sentence marketing description and 4-6 precise technical features (display, processor, camera, battery, software, design). Return only JSON with keys {description: string, features: string[] }. CRITICAL: All features must be factual specifications from the actual product, not generic features.';
-      userPrompt = `Smartphone Product:\n${JSON.stringify(product, null, 2)}${webContext}\n\nResearch and generate ACCURATE technical specifications for this smartphone. Features should be SPECIFIC VERIFIED specs like:
-- Exact display size and technology (e.g., "6.7-inch OLED display with 120Hz refresh rate")
-- Exact processor model (e.g., "Snapdragon 8 Gen 3 processor")
-- Camera specifications (e.g., "50MP main camera with f/1.6 aperture and optical stabilization")
-- Battery capacity (e.g., "5000mAh battery with 65W fast charging")
-- Software and special features
-- Build materials and design
-
-Return JSON with {description, features} containing only REAL, VERIFIED specifications for this exact product model.`;
+      systemPrompt = 'You are a smartphone expert. Write a UNIQUE and DISTINCT description for this specific phone model. Do not repeat generic marketing fluff. Focus on its specific identity. Produce 4-6 precise technical features (display, processor, camera, battery). Return JSON {description: string, features: string[] }.';
+      userPrompt = `Smartphone Product:\n${JSON.stringify(product, null, 2)}${webContext}\n\nGenerate a UNIQUE description and ACCURATE technical specs for this smartphone. \n\nDescription requirements:\n- Must be unique to the ${product.title}\n- Mention specific standout capabilities\n- Do NOT use a generic opening like "Experience the best"\n\nFeatures requirements:\n- Exact display size/tech\n- Processor model\n- Camera specs\n- Battery/Charging\n\nReturn JSON.`;
     } else if (category.includes('tablet') || category.includes('ipad')) {
-      systemPrompt = 'You are a tablet specialist with access to official specifications. Generate ACCURATE technical descriptions with VERIFIED specifications. Produce 1-2 sentence description and 4-6 precise ACTUAL technical features. Return only JSON with keys {description: string, features: string[] }. CRITICAL: All features must be factual, verified specifications.';
-      userPrompt = `Tablet Product:\n${JSON.stringify(product, null, 2)}${webContext}\n\nResearch and generate ACCURATE technical specifications for this tablet. Features must be VERIFIED specs such as:
-- Exact display size, technology, and resolution (e.g., "12.9-inch Liquid Retina XDR display, 2732x2048 resolution")
-- Exact processor (e.g., "Apple M2 chip with 10-core GPU")
-- RAM and storage configuration
-- Camera specifications
-- Battery capacity and charging
-- Operating system version
-- Weight and dimensions
-
-Return JSON with {description, features} containing only REAL, VERIFIED specifications.`;
+      systemPrompt = 'You are a tablet specialist. Write a UNIQUE description specific to this tablet model. Avoid generic templates. Produce 4-6 precise ACTUAL technical features. Return JSON {description: string, features: string[] }.';
+      userPrompt = `Tablet Product:\n${JSON.stringify(product, null, 2)}${webContext}\n\nGenerate a UNIQUE description and ACCURATE specs for this tablet. \n\nDescription:\n- Specific to this model's use case (creative, pro, consumption)\n- Unique selling point\n\nFeatures:\n- Display specs\n- Chipset\n- Storage/RAM\n- Camera/Battery\n\nReturn JSON.`;
     } else if (category.includes('laptop') || category.includes('macbook') || category.includes('dell') || category.includes('hp-laptop') || category.includes('lenovo')) {
-      systemPrompt = 'You are a laptop expert with access to manufacturer specifications. Generate ACCURATE technical descriptions with VERIFIED hardware specs. Produce 1-2 sentence description and 4-6 EXACT technical features (processor, RAM, storage, display, battery, graphics). Return only JSON with keys {description: string, features: string[] }. CRITICAL: All specs must be factual, verified information.';
-      userPrompt = `Laptop Product:\n${JSON.stringify(product, null, 2)}${webContext}\n\nResearch and generate ACCURATE technical specifications for this laptop. Features must be VERIFIED specs including:
-- Exact processor generation and model (e.g., "Intel Core i7-13700H processor")
-- RAM type and capacity (e.g., "16GB DDR5 RAM")
-- Storage type and size (e.g., "512GB NVMe SSD")
-- Display specifications (e.g., "15.6-inch IPS display, 1920x1080, 144Hz refresh rate")
-- Graphics (e.g., "NVIDIA RTX 4060 with 8GB GDDR6")
-- Battery capacity and estimated runtime
-- Ports and connectivity
-
-Return JSON with {description, features} containing REAL, VERIFIED specifications for this exact model.`;
-    } else if (category.includes('desktop') || category.includes('aio') || category.includes('computer') || category.includes('gaming-pc')) {
-      systemPrompt = 'You are a desktop computer expert with access to hardware specifications. Generate ACCURATE descriptions with VERIFIED hardware specs. Produce 1-2 sentence description and 4-6 EXACT technical features. Return only JSON with keys {description: string, features: string[] }. CRITICAL: All specifications must be factual and verified.';
-      userPrompt = `Desktop/All-in-One Computer Product:\n${JSON.stringify(product, null, 2)}${webContext}\n\nResearch and generate ACCURATE technical specifications for this desktop/AIO. Features must be VERIFIED specs such as:
-- CPU: exact model and generation (e.g., "Intel Core i9-13900K processor, 24 cores")
-- RAM: type and capacity (e.g., "64GB DDR5 RAM")
-- Storage: type and capacity (e.g., "2TB NVMe SSD")
-- GPU: exact model (e.g., "NVIDIA RTX 4090 with 24GB GDDR6X")
-- For AIOs: display specifications (e.g., "23.8-inch 4K display with USB-C")
-- Power supply specifications (e.g., "850W Gold-rated power supply")
-- Expansion and connectivity options
-
-Return JSON with {description, features} containing REAL, VERIFIED specifications.`;
+      systemPrompt = 'You are a laptop expert. Write a UNIQUE and specific description for this laptop. Do not use generic text. Produce 4-6 EXACT technical features. Return JSON {description: string, features: string[] }.';
+      userPrompt = `Laptop Product:\n${JSON.stringify(product, null, 2)}${webContext}\n\nGenerate a UNIQUE description and ACCURATE specs for this laptop. \n\nDescription:\n- Highlight specific performance capabilities of the ${product.title}\n- Target audience (gamer, pro, student)\n\nFeatures:\n- CPU model\n- RAM/Storage\n- Display specs\n- Graphics card\n- Ports/Battery\n\nReturn JSON.`;
     } else if (category.includes('gaming') || category.includes('playstation') || category.includes('xbox') || category.includes('nintendo')) {
-      systemPrompt = 'You are a gaming expert with access to console and gaming PC specifications. Generate engaging, ACCURATE descriptions with VERIFIED gaming features. Produce 1-2 sentence description and 4-6 FACTUAL gaming features. Return only JSON with keys {description: string, features: string[] }. CRITICAL: All specifications must be real, verified gaming features and performance metrics.';
-      userPrompt = `Gaming Product:\n${JSON.stringify(product, null, 2)}${webContext}\n\nResearch and generate ACCURATE gaming specifications. Features must be VERIFIED gaming specs such as:
-- Graphics capabilities (e.g., "4K gaming at 120fps with ray tracing support")
-- Storage speed (e.g., "1TB custom NVMe SSD with ultra-fast load times")
-- Special gaming features (e.g., "Dual haptic triggers for immersive feedback, adaptive triggers")
-- Game Pass or exclusive titles
-- Performance metrics and benchmarks
-- Backward compatibility
-- Online features and services
-
-Return JSON with {description, features} containing REAL, VERIFIED gaming specifications and features.`;
+      systemPrompt = 'You are a gaming expert. Write a UNIQUE description for this gaming product. Avoid generic phrases. Produce 4-6 FACTUAL gaming features. Return JSON {description: string, features: string[] }.';
+      userPrompt = `Gaming Product:\n${JSON.stringify(product, null, 2)}${webContext}\n\nGenerate a UNIQUE description and ACCURATE specs.\n\nDescription:\n- Focus on the specific gaming experience of this item\n- Mention exclusive titles or features\n\nFeatures:\n- Graphics/Performance\n- Storage/Load times\n- Controller/Input specs\n- Services/Compatibility\n\nReturn JSON.`;
     }
   }
 
@@ -223,7 +171,7 @@ Return JSON with {description, features} containing REAL, VERIFIED gaming specif
     const reply = await callChat(messages);
     const parsed = extractJSON(reply);
     if (parsed && typeof parsed.description === 'string' && Array.isArray(parsed.features)) {
-      console.log('✓ AI generated verified product features');
+      console.log('✓ AI generated unique product description and features');
       return parsed;
     }
   } catch (error) {

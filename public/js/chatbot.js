@@ -1,3 +1,8 @@
+// --- START OF FILE public/js/chatbot.js ---
+
+// Track the last thing the bot said to provide context for "Yes/No" answers
+let lastBotReplyText = "";
+
 // This function sends a POST request to our GraphQL endpoint
 async function askGraphQL(question) {
     const query = `
@@ -52,6 +57,81 @@ function highlightProduct(productId) {
     }
 }
 
+// --- Text-to-Speech with Enhanced Voice Selection ---
+
+let availableVoices = [];
+
+// Function to populate the list of available voices. This is crucial because
+// browsers load voices asynchronously.
+function loadVoices() {
+    availableVoices = window.speechSynthesis.getVoices();
+}
+
+// Load voices when they are ready.
+if ('speechSynthesis' in window) {
+    loadVoices(); // Initial attempt in case they are already loaded.
+    if (window.speechSynthesis.onvoiceschanged !== undefined) {
+        // The event that fires when the voice list has been loaded.
+        window.speechSynthesis.onvoiceschanged = loadVoices;
+    }
+}
+
+// Function to speak text using browser Web Speech API
+function speakText(text) {
+    if (!('speechSynthesis' in window)) {
+        console.warn("Text-to-speech not supported in this browser.");
+        return;
+    }
+
+    // Cancel any current speaking to prevent overlap
+    window.speechSynthesis.cancel();
+
+    const utterance = new SpeechSynthesisUtterance(text);
+
+    // A prioritized list of known high-quality female voice names across platforms.
+    // The more specific, higher-quality names are first.
+    const priorityFemaleVoiceNames = [
+        'Google UK English Female', // Google Chrome (Desktop)
+        'Samantha',                 // Apple (macOS/iOS - high quality)
+        'Microsoft Zira Desktop - English (United States)', // Microsoft Edge/Windows
+        'Tessa',                    // Apple (macOS/iOS)
+        'Karen',                    // Apple (macOS/iOS)
+        'Moira',                    // Apple (macOS/iOS)
+        'Susan',                    // Older Microsoft
+        'Hazel',                    // Older Microsoft
+        'Google US English'         // This can be female on some systems, so it's a lower priority option.
+    ];
+
+    let selectedVoice = null;
+
+    // 1. Try to find a voice from our high-priority list.
+    for (const name of priorityFemaleVoiceNames) {
+        const voice = availableVoices.find(v => v.name === name && v.lang.startsWith('en'));
+        if (voice) {
+            selectedVoice = voice;
+            break; // Stop searching once we find a priority voice
+        }
+    }
+
+    // 2. If no priority voice was found, fall back to searching for any English voice
+    // that explicitly identifies as "Female".
+    if (!selectedVoice) {
+        selectedVoice = availableVoices.find(voice => voice.lang.startsWith('en') && voice.name.includes('Female'));
+    }
+
+    // 3. If a suitable voice was found, assign it. Otherwise, the browser will use its default.
+    if (selectedVoice) {
+        utterance.voice = selectedVoice;
+    } else {
+        console.warn("TTS: No specific female voice found. Using browser default.");
+    }
+
+    utterance.rate = 1; // Speed
+    utterance.pitch = 1; // Pitch
+
+    window.speechSynthesis.speak(utterance);
+}
+
 
 export function initChatbot() {
     const container = document.querySelector('.chatbot-container');
@@ -73,7 +153,12 @@ export function initChatbot() {
 
     // Toggle chat widget visibility
     toggleBtn.addEventListener('click', () => container.classList.add('open'));
-    closeBtn.addEventListener('click', () => container.classList.remove('open'));
+    closeBtn.addEventListener('click', () => {
+        container.classList.remove('open');
+        if ('speechSynthesis' in window) {
+            window.speechSynthesis.cancel(); // Stop speaking if closed
+        }
+    });
 
     // Handle form submission
     chatForm.addEventListener('submit', async (e) => {
@@ -81,17 +166,36 @@ export function initChatbot() {
         const userQuestion = chatInput.value.trim();
         if (!userQuestion) return;
 
+        // Display user's question immediately
         addMessage(userQuestion, 'user');
         chatInput.value = '';
 
+        // Construct context-aware prompt for the backend
+        // We hide this logic from the UI, but send it to the LLM
+        let contextAwareQuestion = userQuestion;
+        if (lastBotReplyText) {
+            contextAwareQuestion = `Previous Bot Message: "${lastBotReplyText}"\n\nCurrent User Input: "${userQuestion}"`;
+        }
+
         // Add a temporary "typing" message for the bot
-        addMessage('Thinking...', 'bot');
-        const { reply, navigationTarget, highlightProductId } = await askGraphQL(userQuestion);
+        const typingDiv = document.createElement('div');
+        typingDiv.className = 'message bot';
+        typingDiv.textContent = 'Thinking...';
+        messagesContainer.appendChild(typingDiv);
+        
+        // Send the context-aware question to the backend
+        const { reply, navigationTarget, highlightProductId } = await askGraphQL(contextAwareQuestion);
         
         // Remove the "typing" message
-        messagesContainer.removeChild(messagesContainer.lastChild);
+        messagesContainer.removeChild(typingDiv);
         
+        // Store this reply for the next turn
+        lastBotReplyText = reply;
+
         addMessage(reply, 'bot');
+
+        // *** TRIGGER TEXT TO SPEECH ***
+        speakText(reply);
 
         // Check for navigation target and act on it
         if (navigationTarget) {
@@ -105,7 +209,7 @@ export function initChatbot() {
         // Check for a product to highlight; if so navigate to the product page first
         if (highlightProductId) {
             const targetHash = `#product/${highlightProductId}`;
-            // If we're not already on the product page, navigate there first
+            // If we are not already on the product page, navigate there first
             if (location.hash !== targetHash) {
                 location.hash = targetHash;
                 // Give the router a moment to render the product page, then highlight
@@ -117,3 +221,4 @@ export function initChatbot() {
         }
     });
 }
+// --- END OF FILE public/js/chatbot.js ---

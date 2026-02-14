@@ -43,6 +43,8 @@ const productSchema = mongoose.Schema({
   features: [{ type: String }],
   // Clothing-specific filters (e.g., 'tops','bottoms','shoes') used on clothes pages
   clothingFilters: [{ type: String }],
+  // New field for Clothing Sizes
+  sizes: [{ type: String }], 
   stock: { type: Number },
   
   // Sale & Promotion Fields

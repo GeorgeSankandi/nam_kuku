@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NAMIX - Premium Tech Experience</title>
+    <title>NamKuku - Premium Tech Experience</title>
     
     <!-- FONT & ICONS -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -29,12 +29,16 @@
             </p>
         </div>
         <div class="top-header">
-            <a href="#home" class="logo">NAMIX</a>
+            <!-- Mobile header row logic removed, logo stays central/left depending on CSS -->
+            <a href="#home" class="logo">NamKuku</a>
+            
             <div class="search-bar">
                 <input type="text" id="search-input" placeholder="Search products...">
                 <button class="search-btn" id="search-btn"><i class="fas fa-search"></i></button>
             </div>
-            <div class="top-nav-menu">
+            
+            <!-- Desktop Top Menu (Hidden on Mobile) -->
+            <div class="top-nav-menu desktop-only">
                 <ul>
                     <li><a href="#home">Home</a></li>
                     <li><a href="#about">About Us</a></li>
@@ -44,6 +48,7 @@
                     <li><a href="#contact">Contact</a></li>
                 </ul>
             </div>
+
             <div class="header-icons">
                 <a href="#login" id="login-link" class="auth-link"><i class="fas fa-sign-in-alt"></i> Login</a>
                 <a href="#register" id="register-link" class="auth-link"><i class="fas fa-user-plus"></i> Sign Up</a>
@@ -56,8 +61,8 @@
         </div>
     </header>
 
-    <!-- ======== GLOBAL NAVIGATION ======== -->
-    <nav>
+    <!-- ======== DESKTOP NAVIGATION (Hidden on Mobile) ======== -->
+    <nav class="desktop-nav">
         <ul>
             <li>
                 <a href="#category/phones"><i class="fas fa-mobile-alt"></i>Phones<span class="dropdown-arrow">▼</span></a>
@@ -136,6 +141,113 @@
             </div>
         </div>
     </div>
+
+    <!-- ======== MOBILE SIDE MENU (POPUP) ======== -->
+    <div class="mobile-side-menu-overlay" id="mobile-menu-overlay"></div>
+    <div class="mobile-side-menu" id="mobile-side-menu">
+        <div class="menu-header">
+            <h3>Menu</h3>
+            <button class="close-menu-btn" id="close-menu-btn">&times;</button>
+        </div>
+        <ul class="mobile-menu-links">
+            <li><a href="#home"><i class="fas fa-home"></i> Home</a></li>
+            <li><a href="#about"><i class="fas fa-info-circle"></i> About Us</a></li>
+            <li><a href="#trade-in"><i class="fas fa-sync-alt"></i> Trade-In</a></li>
+            <li><a href="#second-hand"><i class="fas fa-recycle"></i> Second-Hand</a></li>
+            <li><a href="#trending"><i class="fas fa-fire"></i> Trending</a></li>
+            <li><a href="#contact"><i class="fas fa-envelope"></i> Contact</a></li>
+        </ul>
+    </div>
+
+    <!-- ======== MOBILE BOTTOM NAVIGATION WITH DROP-UPS ======== -->
+    <nav class="mobile-bottom-nav">
+        <ul>
+            <li class="mobile-nav-item">
+                <a href="javascript:void(0)" class="mobile-nav-link" data-menu="phones-menu">
+                    <i class="fas fa-mobile-alt"></i><span>Phones</span>
+                </a>
+                <ul class="mobile-dropup-menu" id="phones-menu">
+                    <li><a href="#category/phones"><strong>All Phones</strong></a></li>
+                    <li><a href="#category/iphones">iPhones</a></li>
+                    <li><a href="#category/samsung-phones">Samsung</a></li>
+                    <li><a href="#category/android-phones">Android</a></li>
+                </ul>
+            </li>
+            
+            <li class="mobile-nav-item">
+                <a href="javascript:void(0)" class="mobile-nav-link" data-menu="tablets-menu">
+                    <i class="fas fa-tablet-alt"></i><span>Tablets</span>
+                </a>
+                <ul class="mobile-dropup-menu" id="tablets-menu">
+                    <li><a href="#category/tablets"><strong>All Tablets</strong></a></li>
+                    <li><a href="#category/ipads">iPads</a></li>
+                    <li><a href="#category/samsung-tabs">Samsung Tabs</a></li>
+                    <li><a href="#category/lenovo-tabs">Lenovo/Android</a></li>
+                </ul>
+            </li>
+
+            <li class="mobile-nav-item">
+                <a href="javascript:void(0)" class="mobile-nav-link" data-menu="laptops-menu">
+                    <i class="fas fa-laptop"></i><span>Laptops</span>
+                </a>
+                <ul class="mobile-dropup-menu" id="laptops-menu">
+                    <li><a href="#category/laptops"><strong>All Computers</strong></a></li>
+                    <li><a href="#category/macbooks">MacBooks</a></li>
+                    <li><a href="#category/hp-laptops">HP</a></li>
+                    <li><a href="#category/dell-laptops">Dell</a></li>
+                    <li><a href="#category/imacs">iMacs & Desktop</a></li>
+                </ul>
+            </li>
+
+            <li class="mobile-nav-item">
+                <a href="javascript:void(0)" class="mobile-nav-link" data-menu="gaming-menu">
+                    <i class="fas fa-gamepad"></i><span>Gaming</span>
+                </a>
+                <ul class="mobile-dropup-menu" id="gaming-menu">
+                    <li><a href="#category/gaming"><strong>All Gaming</strong></a></li>
+                    <li><a href="#category/playstation">PlayStation</a></li>
+                    <li><a href="#category/xbox">Xbox</a></li>
+                    <li><a href="#category/gaming-accessories">Accessories</a></li>
+                </ul>
+            </li>
+
+            <li class="mobile-nav-item">
+                <a href="javascript:void(0)" class="mobile-nav-link" data-menu="clothes-menu">
+                    <i class="fas fa-shirt"></i><span>Clothes</span>
+                </a>
+                <ul class="mobile-dropup-menu" id="clothes-menu">
+                    <li><a href="#category/clothes"><strong>All Clothes</strong></a></li>
+                    <li><a href="#category/womens-clothes">Women's</a></li>
+                    <li><a href="#category/mens-clothes">Men's</a></li>
+                </ul>
+            </li>
+
+            <li class="mobile-nav-item">
+                <a href="javascript:void(0)" class="mobile-nav-link" data-menu="kids-menu">
+                    <i class="fas fa-child"></i><span>Kids</span>
+                </a>
+                <ul class="mobile-dropup-menu" id="kids-menu">
+                    <li><a href="#category/kids"><strong>All Kids</strong></a></li>
+                    <li><a href="#category/kids-electronics">Kids Tech</a></li>
+                    <li><a href="#category/kids-clothing">Clothing</a></li>
+                    <li><a href="#category/kids-toys">Toys</a></li>
+                </ul>
+            </li>
+
+            <li class="mobile-nav-item">
+                <a href="javascript:void(0)" class="mobile-nav-link" data-menu="furniture-menu">
+                    <i class="fas fa-couch"></i><span>Furn.</span>
+                </a>
+                <ul class="mobile-dropup-menu" id="furniture-menu">
+                    <li><a href="#category/furniture"><strong>All Furniture</strong></a></li>
+                    <li><a href="#category/living-room">Living Room</a></li>
+                    <li><a href="#category/bedroom">Bedroom</a></li>
+                    <li><a href="#category/office">Office</a></li>
+                    <li><a href="#category/kitchen">Kitchen</a></li>
+                </ul>
+            </li>
+        </ul>
+    </nav>
     
     <!-- ======== GLOBAL FOOTER ======== -->
     <footer class="footer">
@@ -154,14 +266,15 @@
             <h4>Customer Service</h4>
             <ul>
                 <li><a href="#contact">Contact Us</a></li>
-                <li><a href="#delivery">Delivery Info</a></li>
+                <li><a href="#shipping">Delivery Info</a></li>
                 <li><a href="#returns">Returns</a></li>
             </ul>
         </div>
         <div>
-            <h4>About NAMIX</h4>
+            <h4>About NamKuku</h4>
             <ul>
                 <li><a href="#about">Our Story</a></li>
+                <li><a href="#how-to-sell">Sell on NamKuku</a></li>
                 <li><a href="#terms">Terms & Conditions</a></li>
                 <li><a href="#privacy">Privacy Policy</a></li>
                 <li><a href="#faqs">FAQ's</a></li>
@@ -172,6 +285,12 @@
             <p>Join our community of tech enthusiasts.</p>
         </div>
     </footer>
+
+    <!-- ======== FLOATING HAMBURGER MENU (Mobile Only) ======== -->
+    <!-- Moved here to be outside header flow and fixed positioned -->
+    <button class="hamburger-btn floating-hamburger" aria-label="Open Menu">
+        <i class="fas fa-bars"></i>
+    </button>
 
     <!-- ======== CHATBOT WIDGET ======== -->
     <div class="chatbot-container">

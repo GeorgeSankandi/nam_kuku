@@ -16,22 +16,39 @@ export const CartManager = (() => {
         updateCartIcon();
     };
 
-    const addItem = async (productId, quantity = 1, selectedColor = null) => {
+    const addItem = async (productId, quantity = 1, selectedColor = null, selectedSize = null) => {
         // We need to get product details from API to show alert
         const response = await fetch(`/api/products/${productId}`);
         const product = await response.json();
         
-        const existingItem = cart.find(item => item.id === productId && item.selectedColor === selectedColor);
+        // Find item matching ID, Color, AND Size
+        const existingItem = cart.find(item => 
+            item.id === productId && 
+            item.selectedColor === selectedColor &&
+            item.selectedSize === selectedSize
+        );
+
         if (existingItem) {
             existingItem.quantity += quantity;
         } else {
-            cart.push({ id: productId, quantity: quantity, price: product.currentPrice, image: product.image, title: product.title, selectedColor: selectedColor });
+            cart.push({ 
+                id: productId, 
+                quantity: quantity, 
+                price: product.currentPrice, 
+                image: product.image, 
+                title: product.title, 
+                selectedColor: selectedColor,
+                selectedSize: selectedSize
+            });
         }
         save();
         alert(`${product.title} added to cart!`);
     };
     
     const updateQuantity = (productId, newQuantity) => {
+        // Logic for unique cart items logic is simplified here; 
+        // in full implementation, we should pass color/size to update specific variant
+        // For now, updating by ID for simplicity or first match
         const item = cart.find(item => item.id === productId);
         if (item) {
             if (newQuantity <= 0) removeItem(productId);
@@ -41,6 +58,7 @@ export const CartManager = (() => {
     };
     
     const removeItem = (productId) => {
+        // Removes all instances of product ID; for variant specific, need to pass variant details
         cart = cart.filter(item => item.id !== productId);
         save();
     };
@@ -54,5 +72,3 @@ export const CartManager = (() => {
         getCartCount: () => cart.reduce((total, item) => total + item.quantity, 0) 
     };
 })();
-
-// The problematic initial call that ran too early has been removed from this file.

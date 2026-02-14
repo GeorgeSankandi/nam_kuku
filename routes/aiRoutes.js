@@ -1,108 +1,69 @@
 import express from 'express';
 import { generateFeaturesWithGemini, generateDescriptionWithGemini, isGeminiAvailable } from '../utils/geminiService.js';
+import { searchProductImages } from '../utils/imageSearch.js';
 
 const router = express.Router();
 
-/**
- * Generate features for a product title
- * POST /api/ai/generate-features
- * Body: { title: string }
- * Returns: { features: string[] }
- */
+// Route: POST /api/ai/generate-features
 router.post('/generate-features', async (req, res) => {
-  try {
-    if (!isGeminiAvailable()) {
-      return res.status(500).json({ 
-        error: 'Gemini API is not configured',
-        features: []
-      });
+    try {
+        const { title } = req.body;
+        console.log(`[AI Route] Requesting features for: "${title}"`);
+        
+        if (!title) return res.status(400).json({ error: 'Title required' });
+
+        if (!isGeminiAvailable()) {
+            console.warn('[AI Route] Gemini API key missing');
+            return res.json({ success: false, features: [] });
+        }
+
+        const features = await generateFeaturesWithGemini(title);
+        console.log(`[AI Route] Features generated: ${features.length}`);
+        res.json({ success: true, features });
+    } catch (error) {
+        console.error('[AI Route] Features Error:', error);
+        res.status(500).json({ error: 'Failed to generate features' });
     }
-
-    const { title } = req.body;
-
-    if (!title || typeof title !== 'string' || title.trim().length === 0) {
-      return res.status(400).json({ 
-        error: 'Product title is required',
-        features: []
-      });
-    }
-
-    const trimmedTitle = title.trim();
-    
-    if (trimmedTitle.length < 3) {
-      return res.status(400).json({ 
-        error: 'Product title must be at least 3 characters',
-        features: []
-      });
-    }
-
-    console.log(`🔍 Generating features for product: "${trimmedTitle}"`);
-    
-    const features = await generateFeaturesWithGemini(trimmedTitle);
-    
-    console.log(`✓ Successfully generated ${features.length} features for "${trimmedTitle}"`);
-
-    res.json({ 
-      success: true,
-      features: Array.isArray(features) ? features : []
-    });
-
-  } catch (error) {
-    console.error('Error in generate-features endpoint:', error.message);
-    res.status(500).json({ 
-      error: error.message || 'Failed to generate features',
-      features: []
-    });
-  }
 });
 
-/**
- * Generate description for a product
- * POST /api/ai/generate-description
- * Body: { title: string, features?: string[] }
- * Returns: { description: string }
- */
+// Route: POST /api/ai/generate-description
 router.post('/generate-description', async (req, res) => {
-  try {
-    if (!isGeminiAvailable()) {
-      return res.status(500).json({ 
-        error: 'Gemini API is not configured',
-        description: ''
-      });
+    try {
+        const { title, features } = req.body;
+        console.log(`[AI Route] Requesting description for: "${title}"`);
+        
+        if (!title) return res.status(400).json({ error: 'Title required' });
+
+        if (!isGeminiAvailable()) {
+            console.warn('[AI Route] Gemini API key missing');
+            return res.json({ success: false, description: '' });
+        }
+
+        const description = await generateDescriptionWithGemini(title, features);
+        console.log(`[AI Route] Description generated (${description.length} chars)`);
+        res.json({ success: true, description });
+    } catch (error) {
+        console.error('[AI Route] Description Error:', error);
+        res.status(500).json({ error: 'Failed to generate description' });
     }
+});
 
-    const { title, features } = req.body;
+// Route: POST /api/ai/generate-images
+router.post('/generate-images', async (req, res) => {
+    try {
+        const { title } = req.body;
+        console.log(`[AI Route] Requesting images for: "${title}"`);
+        
+        if (!title) return res.status(400).json({ error: 'Title required' });
 
-    if (!title || typeof title !== 'string' || title.trim().length === 0) {
-      return res.status(400).json({ 
-        error: 'Product title is required',
-        description: ''
-      });
+        const images = await searchProductImages(title);
+        console.log(`[AI Route] Images found: ${images.length}`);
+        res.json({ success: true, images });
+    } catch (error) {
+        console.error('[AI Route] Image Error:', error);
+        res.status(500).json({ error: 'Failed to find images', images: [] });
     }
-
-    const trimmedTitle = title.trim();
-
-    console.log(`📝 Generating description for product: "${trimmedTitle}"`);
-    
-    const description = await generateDescriptionWithGemini(
-      trimmedTitle,
-      Array.isArray(features) ? features : []
-    );
-    
-    console.log(`✓ Successfully generated description for "${trimmedTitle}"`);
-
-    res.json({ 
-      success: true,
-      description: description || ''
-    });
-
-  } catch (error) {
-    console.error('Error in generate-description endpoint:', error.message);
-    res.status(500).json({ 
-      error: error.message || 'Failed to generate description',
-      description: ''
-    });
-  }
 });
 
 export default router;
+

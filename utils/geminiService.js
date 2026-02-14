@@ -1,5 +1,6 @@
-// No need to import process - it's globally available in Node.js
-// Read API key lazily at function call time instead of at module load
+// utils/geminiService.js
+
+// Use the stable 1.5-flash model
 const GEMINI_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent';
 
 const getGeminiApiKey = () => process.env.GEMINI_API_KEY;
@@ -23,7 +24,8 @@ export const generateFeaturesWithGemini = async (productTitle) => {
   const apiKey = getGeminiApiKey();
   
   if (!apiKey) {
-    throw new Error('GEMINI_API_KEY is not configured');
+    console.error('GEMINI_API_KEY is not configured');
+    return []; // Return empty array gracefully
   }
 
   try {
@@ -49,35 +51,22 @@ Product Title: ${productTitle}
 Generate realistic features based on current market products with this title. Search your knowledge base for authentic specifications.`;
 
     const requestBody = {
-      contents: [
-        {
-          parts: [
-            {
-              text: prompt
-            }
-          ]
-        }
-      ],
+      contents: [{ parts: [{ text: prompt }] }],
       generationConfig: {
         temperature: 0.3,
-        topK: 40,
-        topP: 0.95,
         maxOutputTokens: 500
       }
     };
 
     const response = await fetch(`${GEMINI_URL}?key=${apiKey}`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(requestBody)
     });
 
     if (!response.ok) {
       const errorData = await response.json();
-      console.error('Gemini API error:', errorData);
-      throw new Error(`Gemini API error: ${response.status}`);
+      throw new Error(`Gemini API error: ${response.status} - ${JSON.stringify(errorData)}`);
     }
 
     const data = await response.json();
@@ -88,24 +77,26 @@ Generate realistic features based on current market products with this title. Se
 
     const responseText = data.candidates[0].content.parts[0].text;
     
-    // Extract JSON from response
+    // ROBUST JSON EXTRACTION: Find the first '{' and the last '}'
     const jsonMatch = responseText.match(/\{[\s\S]*\}/);
+    
     if (!jsonMatch) {
-      console.error('Could not extract JSON from Gemini response:', responseText);
-      throw new Error('Could not parse JSON from Gemini response');
+      console.warn('Could not extract JSON from Gemini response. Raw text:', responseText);
+      return [];
     }
 
     const parsedResponse = JSON.parse(jsonMatch[0]);
     
     if (!Array.isArray(parsedResponse.features)) {
-      throw new Error('Features is not an array in Gemini response');
+      console.warn('Features is not an array in Gemini response:', parsedResponse);
+      return [];
     }
 
     return parsedResponse.features;
 
   } catch (error) {
     console.error('Error generating features with Gemini:', error.message);
-    throw error;
+    return []; // Return empty array on failure so app doesn't crash
   }
 };
 
@@ -120,56 +111,48 @@ export const generateDescriptionWithGemini = async (productTitle, features = [])
   const apiKey = getGeminiApiKey();
   
   if (!apiKey) {
-    throw new Error('GEMINI_API_KEY is not configured');
+    return ''; // Return empty string gracefully
   }
 
   try {
     const featuresText = features.length > 0 
-      ? `Key features:\n${features.map(f => `- ${f}`).join('\n')}\n\n`
+      ? `Key features context:\n${features.map(f => `- ${f}`).join('\n')}\n\n`
       : '';
 
-    const prompt = `You are a professional product copywriter. Based on the product title "${productTitle}", write a compelling but accurate product description.
+    const prompt = `You are a professional product copywriter for a premium electronics store called NamKuku. 
+    
+Product Title: "${productTitle}"
 
 ${featuresText}
 
-Create a concise marketing description (2-3 sentences) that:
-- Highlights the product's main benefits
-- Is accurate and not misleading
-- Uses professional marketing language
-- Is suitable for an e-commerce product page
+Task: Write a UNIQUE, DISTINCT, and COMPELLING marketing description for this specific product (2-3 sentences). 
 
-Return only the description text, no JSON or additional formatting.`;
+Requirements:
+1. Do NOT use generic templates. 
+2. Focus specifically on the unique identity and key selling points of "${productTitle}".
+3. Make it distinct from other similar product descriptions.
+4. Use a professional, engaging tone.
+5. If it's a "Renewed Premium" or "Second-hand" item, mention the value and quality assurance.
+
+Return ONLY the description text, no JSON, no formatting, just the paragraph.`;
 
     const requestBody = {
-      contents: [
-        {
-          parts: [
-            {
-              text: prompt
-            }
-          ]
-        }
-      ],
+      contents: [{ parts: [{ text: prompt }] }],
       generationConfig: {
-        temperature: 0.2,
-        topK: 40,
-        topP: 0.95,
+        temperature: 0.7,
         maxOutputTokens: 300
       }
     };
 
     const response = await fetch(`${GEMINI_URL}?key=${apiKey}`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(requestBody)
     });
 
     if (!response.ok) {
       const errorData = await response.json();
-      console.error('Gemini API error:', errorData);
-      throw new Error(`Gemini API error: ${response.status}`);
+      throw new Error(`Gemini API error: ${response.status} - ${JSON.stringify(errorData)}`);
     }
 
     const data = await response.json();
@@ -182,7 +165,7 @@ Return only the description text, no JSON or additional formatting.`;
 
   } catch (error) {
     console.error('Error generating description with Gemini:', error.message);
-    throw error;
+    return '';
   }
 };
 
