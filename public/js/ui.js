@@ -14,7 +14,7 @@ let isKidsAdmin = false;
 let liveViewerInterval = null;
 
 // Standard Clothing Sizes for Admin Dropdown
-const STANDARD_SIZES = ['XS', 'S', 'M', 'L', 'XL', 'XXL', '3XL', 'UK 4', 'UK 6', 'UK 8', 'UK 10', 'UK 12', 'UK 14', 'One Size', '2-3Y', '3-4Y', '4-5Y', '5-6Y', '7-8Y', '9-10Y', '11-12Y', '13-14Y'];
+const STANDARD_SIZES = ['XS', 'S', 'M', 'L', 'XL', 'XXL', '3XL', 'UK 4', 'UK 6', 'UK 8', 'UK 10', 'UK 12', 'UK 14', 'One Size'];
 
 // Set up cart update callback
 setCartUpdateCallback(() => {
@@ -87,7 +87,7 @@ const getAppRoot = () => {
     const root = document.getElementById('app-root');
     if (!root) {
         console.error('CRITICAL: #app-root element not found in DOM.');
-        // Fallback: create main if missing
+        // Fallback: create main if missing (unlikely but safe)
         const main = document.createElement('main');
         main.id = 'app-root';
         document.body.appendChild(main);
@@ -246,7 +246,7 @@ const createProductCard = (product) => {
             <div class="product-image">
                 ${createProductTags(product, 'card')}
                 ${timerHTML}
-                <img src="${product.image}" alt="${product.title}">
+                <img src="${product.image}" alt="${product.title}" onerror="this.onerror=null; this.src='https://via.placeholder.com/250x250.png?text=Image+Not+Found';">
             </div>
             <div class="product-details">
                 <h3 class="product-title">${product.title}</h3>
@@ -268,156 +268,174 @@ const createProductCard = (product) => {
 
 export const renderShippingInfoPage = () => {
     getAppRoot().innerHTML = `
-        <div class="corporate-minimalist-hero">
+        <div class="page-hero-header static-page-hero">
             <h1>Delivery & Shipping</h1>
         </div>
-        <div class="corporate-minimalist-container">
-            <h3>Our Commitment to You</h3>
-            <p>At NamKuku, we are dedicated to delivering your new tech and lifestyle products as quickly, safely, and efficiently as possible. Understanding that receiving your items promptly is a crucial part of the online shopping experience, we have streamlined our logistics to serve every corner of Namibia. We proudly offer complimentary express shipping on every single order, with no minimum purchase required.</p>
-            
-            <h3>Nationwide Delivery Times</h3>
-            <p>Our delivery network is optimized to provide the best possible service times across the country. Your delivery window will depend on your location:</p>
+        <div class="page-container static-page-container">
+            <p>At NAMIX, we strive to deliver your products as quickly and safely as possible. We offer free express shipping on all orders nationwide.</p>
+            <h3>Delivery Times</h3>
             <ul>
-                <li><strong>Windhoek & Surrounding Areas:</strong> Expect your order to arrive on the same day if placed before 12:00 PM on a business day, or on the next business day if placed in the afternoon.</li>
-                <li><strong>Major Towns (e.g., Swakopmund, Walvis Bay, Oshakati, Rundu):</strong> Deliveries to major urban centers are typically completed within 2 to 3 business days.</li>
-                <li><strong>Remote & Outlying Areas:</strong> For customers in more remote locations, we estimate a delivery time of 3 to 5 business days. We are committed to reaching you, no matter where you are.</li>
+                <li><strong>Windhoek:</strong> Same day or next day delivery.</li>
+                <li><strong>Major Towns (Swakopmund, Walvis Bay, Oshakati, etc.):</strong> 2-3 business days.</li>
+                <li><strong>Remote Areas:</strong> 3-5 business days.</li>
             </ul>
-
-            <h3>Our Trusted Courier Partners</h3>
-            <p>To ensure your products arrive in pristine condition, we have partnered with a selection of Namibia's most reliable courier services. Our primary logistics partners include Nampost Courier, known for its extensive nationwide network, and several specialized private logistics companies for high-value or fragile items. Each order is fully insured and tracked from the moment it leaves our facility until it is safely in your hands. You will receive a tracking number via email as soon as your order is dispatched.</p>
+            <h3>Couriers</h3>
+            <p>We use reliable courier partners including Nampost Courier and specialized private logistics to ensure your tech arrives in perfect condition.</p>
         </div>
     `;
 };
 
 export const renderReturnsPage = () => {
     getAppRoot().innerHTML = `
-        <div class="corporate-minimalist-hero">
-            <h1>Returns & Warranty Policy</h1>
+        <div class="page-hero-header static-page-hero">
+            <h1>Returns & Warranty</h1>
         </div>
-        <div class="corporate-minimalist-container">
-            <h3>15-Day Satisfaction Guarantee</h3>
-            <p>Your satisfaction is our top priority. If you are not completely happy with your purchase for any reason, you are welcome to return it within 15 calendar days of receipt. We offer a full refund, exchange, or store credit, provided the item is returned in its original, unopened, and unused condition with all packaging and accessories intact. Please note that for a return to be processed, the item must be in a re-sellable state.</p>
-            
-            <h3>Comprehensive Warranty Coverage</h3>
-            <p>Shop with confidence knowing your purchases are protected.</p>
-            <ul>
-                <li><strong>New Products:</strong> All brand-new products sold by NamKuku come with a standard 1-year manufacturer's warranty. This warranty covers any defects in material or workmanship under normal use during the warranty period.</li>
-                <li><strong>Pre-Owned (Second-Hand) Items:</strong> Our "Renewed Premium" and other pre-owned items undergo rigorous testing and are backed by a comprehensive 6-month warranty. This warranty covers all functional and mechanical defects that are not a result of accidental damage or misuse.</li>
-            </ul>
-
-            <h3>Initiating a Return</h3>
-            <p>To start a return or warranty claim, please send an email to our dedicated support team at <a href="mailto:support@namkuku.com">support@namkuku.com</a>. Kindly include your order number, the name of the product, and a brief description of the issue. Our team will guide you through the next steps within one business day.</p>
+        <div class="page-container static-page-container">
+            <h3>15-Day Return Policy</h3>
+            <p>If you are not completely satisfied with your purchase, you can return it within 15 days of receipt for a full refund or exchange, provided the item is in its original condition.</p>
+            <h3>Warranty</h3>
+            <p>All new products come with a standard 1-year warranty. Pre-owned items include a 6-month warranty covering mechanical defects.</p>
+            <p>To initiate a return, please contact <a href="mailto:support@namix.com">support@namix.com</a>.</p>
         </div>
     `;
 };
 
 export const renderTermsAndConditionsPage = () => {
     getAppRoot().innerHTML = `
-        <div class="corporate-minimalist-hero">
+        <div class="page-hero-header static-page-hero">
             <h1>Terms & Conditions</h1>
         </div>
-        <div class="corporate-minimalist-container">
-            <h3>1. Agreement to Terms</h3>
-            <p>Welcome to NamKuku. By accessing our website, creating an account, or making a purchase, you agree to be bound by these Terms and Conditions and our Privacy Policy. These terms apply to all visitors, users, and others who wish to access or use the service.</p>
-            
-            <h3>2. Pricing and Payment</h3>
-            <p>All prices listed on the NamKuku online store are in Namibian Dollars (NAD) and are inclusive of Value-Added Tax (VAT) where applicable. We strive for accuracy but reserve the right to correct any errors in pricing or product information at any time without prior notice. Payment must be made in full before an order is dispatched.</p>
-
-            <h3>3. Intellectual Property</h3>
-            <p>The NamKuku brand, logo, and all content on this website, including text, graphics, and images, are the exclusive property of NamKuku and are protected by copyright and other intellectual property laws. Unauthorized use is strictly prohibited.</p>
+        <div class="page-container static-page-container">
+            <p>Welcome to NAMIX. By using our website, you agree to these terms.</p>
+            <h3>1. General</h3>
+            <p>These terms apply to all purchases made on the NAMIX online store.</p>
+            <h3>2. Pricing</h3>
+            <p>All prices are in Namibian Dollars (NAD) and include VAT where applicable. Prices are subject to change without notice.</p>
+            <h3>3. Privacy</h3>
+            <p>We respect your privacy. Please review our Privacy Policy for details on how we handle your data.</p>
         </div>
     `;
 };
 
 export const renderPrivacyPolicyPage = () => {
     getAppRoot().innerHTML = `
-        <div class="corporate-minimalist-hero">
+        <div class="page-hero-header static-page-hero">
             <h1>Privacy Policy</h1>
         </div>
-        <div class="corporate-minimalist-container">
-            <h3>Our Commitment to Your Privacy</h3>
-            <p>Your privacy is of paramount importance to us at NamKuku. This Privacy Policy outlines the types of personal information we collect, how it is used, and the steps we take to ensure your data is handled securely and responsibly.</p>
-            
-            <h3>Information We Collect</h3>
-            <p>We collect information you provide directly to us when you create an account, place an order, or contact customer support. This may include:</p>
-            <ul>
-                <li>Your name, email address, and physical address.</li>
-                <li>Payment information (handled securely by our payment processors).</li>
-                <li>Order history and product interests.</li>
-            </ul>
-
-            <h3>How We Use Your Data</h3>
-            <p>We use the information we collect to process your transactions, provide you with order updates, and continuously improve our services and product offerings. We are committed to never selling or renting your personal data to third-party marketers. Your information is only shared with essential partners, such as courier services, for the sole purpose of fulfilling your order.</p>
+        <div class="page-container static-page-container">
+            <p>Your privacy is important to us.</p>
+            <h3>Information Collection</h3>
+            <p>We collect information you provide directly to us, such as when you create an account, make a purchase, or contact support.</p>
+            <h3>Data Usage</h3>
+            <p>We use your information to process transactions, send order updates, and improve our services. We do not sell your personal data to third parties.</p>
         </div>
     `;
 };
 
 export const renderContactPage = () => {
     getAppRoot().innerHTML = `
-        <div class="corporate-minimalist-hero">
+        <div class="page-hero-header static-page-hero">
             <h1>Contact Us</h1>
         </div>
-        <div class="corporate-minimalist-container">
-            <h3>Get In Touch</h3>
-            <p>Whether you have a question about a product, need assistance with an order, or just want to provide feedback, our team is ready to help. Please use the form below or contact us directly through one of the channels listed.</p>
-            
-            <div class="contact-form-section">
-                <div class="contact-details">
-                    <ul>
-                        <li><i class="fas fa-envelope"></i> <div><strong>Email</strong><br>support@namkuku.com</div></li>
-                        <li><i class="fas fa-phone-alt"></i> <div><strong>Phone</strong><br>+264 81 123 4567</div></li>
-                        <li><i class="fas fa-map-marker-alt"></i> <div><strong>Address</strong><br>12 Independence Ave, Windhoek</div></li>
-                    </ul>
-                </div>
-                <form class="contact-form">
-                    <div class="form-group">
-                        <label for="contact-name">Full Name</label>
-                        <input type="text" id="contact-name" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="contact-email">Email Address</label>
-                        <input type="email" id="contact-email" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="contact-message">Message</label>
-                        <textarea id="contact-message" rows="6" required></textarea>
-                    </div>
-                    <button type="submit" class="btn btn-primary">Send Message</button>
-                </form>
-            </div>
+        <div class="page-container static-page-container">
+            <p>Have questions? We're here to help!</p>
+            <ul>
+                <li><strong>Email:</strong> support@namix.com</li>
+                <li><strong>Phone:</strong> +264 81 123 4567</li>
+                <li><strong>Address:</strong> 12 Independence Ave, Windhoek, Namibia</li>
+            </ul>
         </div>
     `;
 };
 
 export const renderHowToSellPage = () => {
     getAppRoot().innerHTML = `
-        <div class="corporate-minimalist-hero">
-            <h1>Sell on NamKuku</h1>
-            <p style="opacity: 0.9; margin-top: 10px; font-size: 1.2rem;">Join Namibia's premium marketplace as a verified reseller.</p>
-        </div>
-        <div class="corporate-minimalist-container">
-            <h3>How to Join</h3>
-            <div class="steps-grid">
-                <div class="step-card">
-                    <div class="step-icon"><i class="fas fa-user-plus"></i></div>
-                    <h3 style="margin-top: 1rem;">1. Register</h3>
-                    <p>Create an account and select your seller type (Clothes, Furniture, etc.).</p>
+        <div class="amazon-layout-wrapper">
+            <!-- Hero Section -->
+            <div class="amazon-hero">
+                <div class="amazon-hero-content">
+                    <h1>Become a NAMIX Seller</h1>
+                    <p>Reach thousands of Namibian customers. Whether you're selling furniture, fashion, or kids' gear, start your business with trusted tools and support.</p>
+                    <a href="#register" class="amazon-cta-btn">Sign Up & Start Selling</a>
                 </div>
-                <div class="step-card">
-                    <div class="step-icon"><i class="fas fa-clock"></i></div>
-                    <h3 style="margin-top: 1rem;">2. Get Approved</h3>
-                    <p>Wait for admin approval. We verify all sellers to ensure quality.</p>
-                </div>
-                <div class="step-card">
-                    <div class="step-icon"><i class="fas fa-store"></i></div>
-                    <h3 style="margin-top: 1rem;">3. Start Selling</h3>
-                    <p>Access your dashboard to list products, manage stock, and track sales.</p>
+                <div class="amazon-hero-img">
+                    <img src="https://images.unsplash.com/photo-1556742049-0cfed4f7a07d?auto=format&fit=crop&w=800&q=80" alt="Seller Dashboard" style="width: 100%; border-radius: 8px; box-shadow: 0 20px 40px rgba(0,0,0,0.1);">
                 </div>
             </div>
-            
-            <div style="text-align: center; margin-top: 4rem; padding-top: 2rem; border-top: 1px solid #eee;">
-                <h3 style="text-align: center; border: none; margin-bottom: 1rem;">Ready to grow your business?</h3>
-                <a href="#register" class="btn btn-primary" style="padding: 15px 50px; font-size: 1.1rem; display: inline-flex; text-decoration: none;">Register Now</a>
+
+            <!-- Quick Stats -->
+            <div class="amazon-stats-bar">
+                <div class="amazon-stat">
+                    <strong>24h</strong>
+                    <span>Approval Time</span>
+                </div>
+                <div class="amazon-stat">
+                    <strong>5%</strong>
+                    <span>Gift Rewards</span>
+                </div>
+                <div class="amazon-stat">
+                    <strong>100%</strong>
+                    <span>Secure Payouts</span>
+                </div>
+            </div>
+
+            <!-- Benefits Grid -->
+            <div class="amazon-section">
+                <div class="amazon-section-header">
+                    <h2>Why Sell on NAMIX?</h2>
+                    <p>We provide the platform, the traffic, and the tools. You provide the products.</p>
+                </div>
+                
+                <div class="amazon-card-grid">
+                    <div class="amazon-card">
+                        <div class="amazon-card-icon"><i class="fas fa-users"></i></div>
+                        <h3>Reach More Customers</h3>
+                        <p>Instantly access a growing database of tech-savvy Namibian shoppers looking for quality clothes, furniture, and more.</p>
+                    </div>
+                    <div class="amazon-card">
+                        <div class="amazon-card-icon"><i class="fas fa-wallet"></i></div>
+                        <h3>Secure Payments</h3>
+                        <p>We handle the transaction processing. Get paid directly to your bank account safely and reliably.</p>
+                    </div>
+                    <div class="amazon-card">
+                        <div class="amazon-card-icon"><i class="fas fa-chart-line"></i></div>
+                        <h3>Powerful Dashboard</h3>
+                        <p>Manage inventory, track sales, and analyze your performance with our easy-to-use seller portal.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- How It Works (Steps) -->
+            <div class="amazon-section" style="background-color: #fcfcfc;">
+                <div class="amazon-section-header">
+                    <h2>How It Works</h2>
+                    <p>Getting started is simple. Launch your store in three steps.</p>
+                </div>
+                
+                <div class="amazon-card-grid">
+                    <div class="amazon-card">
+                        <div class="amazon-card-icon" style="background-color: #fff3e0; color: #d35400;">1</div>
+                        <h3>Register</h3>
+                        <p>Create an account and select your seller category (Clothing, Furniture, or Kids). Submit your details for admin review.</p>
+                    </div>
+                    <div class="amazon-card">
+                        <div class="amazon-card-icon" style="background-color: #e8f5e9; color: #2e7d32;">2</div>
+                        <h3>List Products</h3>
+                        <p>Once approved (usually within 24 hours), use the dashboard to upload images, set prices, and describe your items.</p>
+                    </div>
+                    <div class="amazon-card">
+                        <div class="amazon-card-icon" style="background-color: #e3f2fd; color: #1565c0;">3</div>
+                        <h3>Start Earning</h3>
+                        <p>Customers order your products. You fulfill the order. We process the payment and transfer your earnings.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Final CTA -->
+            <div class="amazon-final-cta">
+                <h2 style="font-size: 2.5rem; margin-bottom: 20px;">Ready to start selling?</h2>
+                <p style="margin-bottom: 30px; font-size: 1.1rem; color: #565959;">Join the NAMIX marketplace today.</p>
+                <a href="#register" class="amazon-cta-btn">Create Your Seller Account</a>
             </div>
         </div>
     `;
@@ -480,10 +498,9 @@ export const renderFaqsPage = async () => {
 };
 
 export const renderAboutPage = async () => {
-    let aboutImage = 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=1350&q=80'; // Default
+    let aboutImage = 'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1600&q=80'; // Clean corporate office
     try {
         const settings = await api.fetchSettings();
-        // The API returns an array of objects: [{ key: 'about_us_image', value: '...' }, ...]
         if (Array.isArray(settings)) {
             const storedImg = settings.find(s => s.key === 'about_us_image');
             if (storedImg && storedImg.value) aboutImage = storedImg.value;
@@ -493,44 +510,48 @@ export const renderAboutPage = async () => {
     }
 
     getAppRoot().innerHTML = `
-        <div class="corporate-minimalist-hero">
-            <h1>About NamKuku</h1>
-        </div>
-        <div class="corporate-minimalist-container">
-            <div class="about-content-wrapper">
-                <div class="about-text">
-                    <h3>Who We Are</h3>
-                    <p>NamKuku is Namibia's premier online destination for high-quality electronics, fashion, and furniture. We are dedicated to providing a seamless shopping experience with trusted products and exceptional customer service.</p>
-                    <h3 style="margin-top: 1.5rem;">Our Mission</h3>
-                    <p>Founded with a vision to connect Namibians with the best global technology and lifestyle brands, we pride ourselves on authenticity, reliability, and innovation. Whether you are looking for the latest smartphone, comfortable furniture, or trendy fashion, NamKuku is your trusted partner.</p>
-                </div>
-                <div class="about-image-container">
-                    <img src="${aboutImage}" alt="About NamKuku">
-                </div>
+        <div class="minimal-about-wrapper">
+            <!-- Minimalist Hero -->
+            <div class="minimal-hero">
+                <h1>We Are NAMIX.</h1>
+                <p>Connecting Namibia to the future of commerce through trust, innovation, and exceptional quality.</p>
             </div>
-            
-            <div class="values-section">
-                <h3>Our Core Values</h3>
-                <div class="values-grid">
-                    <div class="value-card">
-                        <div class="value-icon"><i class="fas fa-check-circle"></i></div>
-                        <h4>Authenticity</h4>
-                        <p>We guarantee 100% genuine products sourced directly from trusted suppliers.</p>
+
+            <!-- Full Width Image -->
+            <img src="${aboutImage}" alt="NAMIX Corporate Headquarters" class="minimal-full-img">
+
+            <!-- Corporate Text Content -->
+            <div class="minimal-content-container">
+                <div class="minimal-section">
+                    <h2>Our Philosophy</h2>
+                    <p class="minimal-text">
+                        At NAMIX, we believe that technology and lifestyle products should be accessible, reliable, and premium. Founded with a singular vision to bridge the gap between global innovation and local accessibility, we have established ourselves as Namibia's premier digital marketplace. We do not merely sell products; we curate experiences that enhance the daily lives of our clientele.
+                    </p>
+                </div>
+
+                <div class="minimal-section">
+                    <h2>The Mission</h2>
+                    <p class="minimal-text">
+                        Our mission is steadfast: to provide a seamless, secure, and sophisticated shopping environment. We are dedicated to authenticity in every transaction and excellence in every interaction. By fostering a platform that supports both individual buyers and verified local resellers, we are building a sustainable ecosystem of commerce that empowers the Namibian economy.
+                    </p>
+                </div>
+
+                <div class="minimal-grid">
+                    <div class="minimal-grid-item">
+                        <h3>Authenticity</h3>
+                        <p>We guarantee that every product listed on our platform meets rigorous quality standards. Trust is our currency.</p>
                     </div>
-                    <div class="value-card">
-                        <div class="value-icon"><i class="fas fa-shipping-fast"></i></div>
-                        <h4>Speed</h4>
-                        <p>Express nationwide delivery ensures your products reach you when you need them.</p>
+                    <div class="minimal-grid-item">
+                        <h3>Innovation</h3>
+                        <p>We continuously evolve our digital infrastructure to offer features like AI-driven assistance and seamless payments.</p>
                     </div>
-                    <div class="value-card">
-                        <div class="value-icon"><i class="fas fa-headset"></i></div>
-                        <h4>Service</h4>
-                        <p>Our dedicated support team is available 24/7 to assist with any queries.</p>
+                    <div class="minimal-grid-item">
+                        <h3>Community</h3>
+                        <p>We support local entrepreneurs by providing a robust platform for clothing, furniture, and lifestyle resellers.</p>
                     </div>
-                    <div class="value-card">
-                        <div class="value-icon"><i class="fas fa-shield-alt"></i></div>
-                        <h4>Trust</h4>
-                        <p>Secure payments and a transparent return policy for your peace of mind.</p>
+                    <div class="minimal-grid-item">
+                        <h3>Service</h3>
+                        <p>Our commitment to the customer extends beyond the checkout button, with comprehensive warranty and support.</p>
                     </div>
                 </div>
             </div>
@@ -798,28 +819,9 @@ export const renderCategoryPage = (products, categoryKey, searchTerm = '') => {
         `;
     }
 
-    // New filter for curated pages
-    let curatedPageFilterHTML = '';
-    if (['new-arrivals', 'combos', 'trending'].includes(categoryKey)) {
-        curatedPageFilterHTML = `
-            <div class="filter-group">
-                <label for="curated-page-category-filter">Category:</label>
-                <select id="curated-page-category-filter">
-                    <option value="all">All Categories</option>
-                    <option value="phones">Phones</option>
-                    <option value="tablets">Tablets</option>
-                    <option value="laptops">Laptops & Computers</option>
-                    <option value="gaming">Gaming</option>
-                    <option value="furniture">Furniture</option>
-                </select>
-            </div>
-        `;
-    }
-
     const filterControlsHTML = `
         <div class="filter-controls">
             ${secondHandFilterHTML}
-            ${curatedPageFilterHTML}
             <div class="filter-group">
                 <label for="sort-by">Sort By:</label>
                 <select id="sort-by">
@@ -846,37 +848,6 @@ export const renderCategoryPage = (products, categoryKey, searchTerm = '') => {
     `;
     
     let currentDisplayed = Array.isArray(products) ? [...products] : [];
-
-    // Attach event listener for the new curated page filter
-    const curatedPageFilter = document.getElementById('curated-page-category-filter');
-    if (curatedPageFilter) {
-        curatedPageFilter.addEventListener('change', (e) => {
-            const filterVal = e.target.value;
-            let filteredProducts;
-            if (filterVal === 'all') {
-                filteredProducts = [...products];
-            } else {
-                filteredProducts = products.filter(p => {
-                    const cat = (p.category || '').toLowerCase();
-                    const parentCat = categoryData[cat]?.parent?.toLowerCase();
-                    if (filterVal === 'phones') return cat.includes('phone') || parentCat === 'phones';
-                    if (filterVal === 'tablets') return cat.includes('tab') || parentCat === 'tablets';
-                    if (filterVal === 'laptops') return ['laptops', 'computers'].includes(parentCat) || ['macbooks', 'dell-laptops', 'hp-laptops', 'imacs', 'hp-aio'].includes(cat);
-                    if (filterVal === 'gaming') return parentCat === 'gaming' || cat.includes('gaming');
-                    if (filterVal === 'furniture') return parentCat === 'furniture' || ['furniture', 'furnitures'].includes(cat);
-                    return false;
-                });
-            }
-            currentDisplayed = filteredProducts;
-            const newGridHTML = currentDisplayed.length > 0 
-                ? currentDisplayed.map(p => createProductCard(p)).join('') 
-                : '<h3>No products found in this category.</h3>';
-            
-            document.querySelector('.products-grid').innerHTML = newGridHTML;
-            document.getElementById('sort-by').value = 'default';
-            startLiveTimerUpdates();
-        });
-    }
 
     if (categoryKey === 'second-hand') {
         const secondHandFilter = document.getElementById('second-hand-category-filter');
@@ -1142,9 +1113,9 @@ export const renderProductPage = async (product) => {
                 ${createProductTags(product, 'detail')}
                 <div id="image-viewer-count" class="image-viewer-count" style="display: none;"></div>
                 <div class="main-image-container">
-                    <img src="${product.image}" alt="${product.title}" class="main-image" id="main-image">
+                    <img src="${product.image}" alt="${product.title}" class="main-image" id="main-image" onerror="this.onerror=null; this.src='https://via.placeholder.com/500x500.png?text=Image+Not+Found';">
                 </div>
-                <div class="thumbnails">${[product.image, ...(product.thumbnails || [])].map((thumb, i) => `<img src="${thumb}" class="thumbnail ${i === 0 ? 'active' : ''}" data-full="${thumb}">`).join('')}</div>
+                <div class="thumbnails">${[product.image, ...(product.thumbnails || [])].map((thumb, i) => `<img src="${thumb}" class="thumbnail ${i === 0 ? 'active' : ''}" data-full="${thumb}" onerror="this.onerror=null; this.src='https://via.placeholder.com/100x100.png?text=Error';">`).join('')}</div>
             </div>
             <div class="details-section">
                 <h1>${product.title}</h1>
@@ -1613,10 +1584,10 @@ export const renderPaymentMethodPage = async (method) => {
     if (method === 'eft') {
         instructionsHTML = `
             <h4>How to Pay via EFT</h4>
-            <p>Use the bank details below and email your proof of payment to payments@namkuku.com.</p>
+            <p>Use the bank details below and email your proof of payment to payments@namix.com.</p>
             <ul class="payment-details-list">
                 <li><strong>Bank:</strong> <span>FNB Namibia</span></li>
-                <li><strong>Account Name:</strong> <span>NamKuku Tech</span></li>
+                <li><strong>Account Name:</strong> <span>NAMIX Tech</span></li>
                 <li><strong>Account Number:</strong> <span class="monospaced">62201234567</span></li>
                 <li><strong>Reference:</strong> <span class="highlight-ref">${order.customerName}</span></li>
             </ul>
@@ -1625,12 +1596,12 @@ export const renderPaymentMethodPage = async (method) => {
     } else if (method === 'ewallet') {
         instructionsHTML = `
             <h4>Pay with E-Wallet</h4>
-            <p>Transfer the total to the NamKuku merchant account using your preferred app.</p>
+            <p>Transfer the total to the NAMIX merchant account using your preferred app.</p>
             <ul class="payment-details-list">
                 <li><strong>Number:</strong> <span class="monospaced">081 123 4567</span></li>
                 <li><strong>Ref:</strong> <span>${order.customerName}</span></li>
             </ul>
-            <p class="note-text">Send a screenshot of the successful transfer to payments@namkuku.com to speed up processing.</p>
+            <p class="note-text">Send a screenshot of the successful transfer to payments@namix.com to speed up processing.</p>
         `;
     } else if (method === 'layby') {
         instructionsHTML = `
@@ -1640,7 +1611,7 @@ export const renderPaymentMethodPage = async (method) => {
                 <li><strong>Deposit:</strong> <span>${formatCurrency(order.totalAmount * 0.2)}</span></li>
                 <li><strong>Balance:</strong> <span>${formatCurrency(order.totalAmount * 0.8)}</span></li>
             </ul>
-            <p class="note-text">Contact sales@namkuku.com or call us to finalize your payment plan.</p>
+            <p class="note-text">Contact sales@namix.com or call us to finalize your payment plan.</p>
         `;
     } else if (method === 'tradein') {
         instructionsHTML = `
@@ -1654,51 +1625,34 @@ export const renderPaymentMethodPage = async (method) => {
 
     // --- CAROUSEL LOGIC ---
     let carouselHTML = '';
-    
-    // REQUEST: Only display on the first two (EFT and E-Wallet)
-    if (method === 'eft' || method === 'ewallet') {
-        const defaultPaymentCarouselImages = [
-            'https://images.unsplash.com/photo-1542223616-4a4b2f9b4b9f?auto=format&fit=crop&w=400&q=80',
-            'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=400&q=80',
-            'https://images.unsplash.com/photo-1523206489230-c012c64b2b48?auto=format&fit=crop&w=400&q=80',
-            'https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?auto=format&fit=crop&w=400&q=80'
-        ];
+    const defaultPaymentCarouselImages = [
+        'https://images.unsplash.com/photo-1542223616-4a4b2f9b4b9f?auto=format&fit=crop&w=400&q=80',
+        'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=400&q=80',
+        'https://images.unsplash.com/photo-1523206489230-c012c64b2b48?auto=format&fit=crop&w=400&q=80',
+        'https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?auto=format&fit=crop&w=400&q=80'
+    ];
 
-        try {
-            const settingsArr = await api.fetchSettings();
-            const settingsMap = {};
-            if (Array.isArray(settingsArr)) {
-                settingsArr.forEach(s => settingsMap[s.key] = s.value);
-            }
+    try {
+        const settingsArr = await api.fetchSettings();
+        const settingsMap = {};
+        if (Array.isArray(settingsArr)) {
+            settingsArr.forEach(s => settingsMap[s.key] = s.value);
+        }
 
-            const uploadedImages = [1, 2, 3, 4]
-                .map(i => settingsMap[`payment_carousel_${i}`])
-                .filter(url => url && url.length > 0);
+        const uploadedImages = [1, 2, 3, 4]
+            .map(i => settingsMap[`payment_carousel_${i}`])
+            .filter(url => url && url.length > 0);
 
-            // Use uploaded images if available, otherwise use defaults
-            const displayImages = uploadedImages.length > 0 ? uploadedImages : defaultPaymentCarouselImages;
+        // Use uploaded images if available, otherwise use defaults
+        const displayImages = uploadedImages.length > 0 ? uploadedImages : defaultPaymentCarouselImages;
 
-            if (displayImages.length > 0) {
-                carouselHTML = `
-                    <div class="payment-carousel-container" style="margin-top: 3rem; border-top: 1px solid #eee; padding-top: 2rem;">
-                        <div class="carousel-wrapper">
-                            <div class="home-category-carousel" style="justify-content: center; flex-wrap: wrap; gap: 15px; padding: 0;">
-                                ${displayImages.map(img => `
-                                    <div class="item" style="background-image: url('${img}'); flex: 0 0 200px; height: 150px; background-size: cover; background-position: center; border-radius: 8px; box-shadow: var(--shadow-soft);"></div>
-                                `).join('')}
-                            </div>
-                        </div>
-                    </div>
-                `;
-            }
-        } catch (err) {
-            console.warn("Failed to load payment carousel images", err);
-            // Fallback if API fails completely
+        if (displayImages.length > 0) {
             carouselHTML = `
                 <div class="payment-carousel-container" style="margin-top: 3rem; border-top: 1px solid #eee; padding-top: 2rem;">
+                    <h3 style="text-align: center; color: var(--corporate-blue); margin-bottom: 1.5rem;">See What Others Bought</h3>
                     <div class="carousel-wrapper">
                         <div class="home-category-carousel" style="justify-content: center; flex-wrap: wrap; gap: 15px; padding: 0;">
-                            ${defaultPaymentCarouselImages.map(img => `
+                            ${displayImages.map(img => `
                                 <div class="item" style="background-image: url('${img}'); flex: 0 0 200px; height: 150px; background-size: cover; background-position: center; border-radius: 8px; box-shadow: var(--shadow-soft);"></div>
                             `).join('')}
                         </div>
@@ -1706,6 +1660,21 @@ export const renderPaymentMethodPage = async (method) => {
                 </div>
             `;
         }
+    } catch (err) {
+        console.warn("Failed to load payment carousel images", err);
+        // Fallback if API fails completely
+        carouselHTML = `
+            <div class="payment-carousel-container" style="margin-top: 3rem; border-top: 1px solid #eee; padding-top: 2rem;">
+                <h3 style="text-align: center; color: var(--corporate-blue); margin-bottom: 1.5rem;">See What Others Bought</h3>
+                <div class="carousel-wrapper">
+                    <div class="home-category-carousel" style="justify-content: center; flex-wrap: wrap; gap: 15px; padding: 0;">
+                        ${defaultPaymentCarouselImages.map(img => `
+                            <div class="item" style="background-image: url('${img}'); flex: 0 0 200px; height: 150px; background-size: cover; background-position: center; border-radius: 8px; box-shadow: var(--shadow-soft);"></div>
+                        `).join('')}
+                    </div>
+                </div>
+            </div>
+        `;
     }
 
     getAppRoot().innerHTML = `
@@ -1793,6 +1762,85 @@ export const renderAdminLoginPage = () => {
     }
 };
 
+export const renderLoginPage = () => {
+    getAppRoot().innerHTML = `
+        <div class="page-container" style="max-width: 500px; margin-top: 3rem;">
+            <div style="background: var(--white); padding: 2.5rem; border-radius: var(--border-radius); box-shadow: var(--shadow-medium);">
+                <h1 style="text-align: center; color: var(--corporate-blue); margin-bottom: 2rem;">Sign In</h1>
+                <form id="login-form">
+                    <div class="form-group">
+                        <label for="email">Email Address</label>
+                        <input type="email" id="email" name="email" required autocomplete="email">
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <input type="password" id="password" name="password" required autocomplete="current-password">
+                    </div>
+                    <div id="login-message" class="form-message" style="text-align: center;"></div>
+                    <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem; padding: 15px;">Sign In</button>
+                </form>
+                <div style="text-align: center; margin-top: 1.5rem;">
+                    <p>Don't have an account? <a href="#register" style="color: var(--corporate-blue); text-decoration: underline;">Sign Up</a></p>
+                </div>
+            </div>
+        </div>
+    `;
+    const msgEl = document.getElementById('login-message');
+    if (msgEl) {
+        msgEl.textContent = '';
+    }
+};
+
+export const renderRegisterPage = () => {
+    getAppRoot().innerHTML = `
+        <div class="page-container" style="max-width: 500px; margin-top: 3rem;">
+            <div style="background: var(--white); padding: 2.5rem; border-radius: var(--border-radius); box-shadow: var(--shadow-medium);">
+                <h1 style="text-align: center; color: var(--corporate-blue); margin-bottom: 2rem;">Create Account</h1>
+                <form id="register-form">
+                    <div class="form-group">
+                        <label for="name">Full Name</label>
+                        <input type="text" id="name" name="name" required autocomplete="name">
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email Address</label>
+                        <input type="email" id="email" name="email" required autocomplete="email">
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <input type="password" id="password" name="password" required autocomplete="new-password" minlength="6">
+                        <div style="margin-top: 0.5rem; padding: 0.75rem; background-color: #f5f5f5; border-radius: 4px; font-size: 0.85rem; color: #555;">
+                            <strong>Password Requirements:</strong>
+                            <ul style="margin: 0.5rem 0 0 1.5rem; padding: 0;">
+                                <li>At least 8 characters</li>
+                                <li>At least 1 capital letter (A-Z)</li>
+                                <li>At least 2 numbers (0-9)</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="sellerType">Account Type</label>
+                        <select id="sellerType" name="sellerType">
+                            <option value="customer">Customer</option>
+                            <option value="clothes">Clothing Seller</option>
+                            <option value="furniture">Furniture Seller</option>
+                            <option value="kids">Kids Products Seller</option>
+                        </select>
+                    </div>
+                    <div id="register-message" class="form-message" style="text-align: center;"></div>
+                    <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem; padding: 15px;">Create Account</button>
+                </form>
+                <div style="text-align: center; margin-top: 1.5rem;">
+                    <p>Already have an account? <a href="#login" style="color: var(--corporate-blue); text-decoration: underline;">Sign In</a></p>
+                </div>
+            </div>
+        </div>
+    `;
+    const msgEl = document.getElementById('register-message');
+    if (msgEl) {
+        msgEl.textContent = '';
+    }
+};
+
 export const renderAdminPage = (allProducts, allUsers, allViewers, allTransactions, allFAQs, settings, sellerType) => {
     isMainAdmin = sellerType === 'admin';
     const mapSellerToCategory = (st) => {
@@ -1836,11 +1884,10 @@ export const renderAdminPage = (allProducts, allUsers, allViewers, allTransactio
         ` : ''}
     `;
 
-    // Render checkbox options for sizes (replacing the old select)
-    const sizeCheckboxesHTML = STANDARD_SIZES.map(size => `
-        <label class="size-checkbox-item" style="cursor: pointer; user-select: none; display: inline-flex; align-items: center; margin: 4px;">
-            <input type="checkbox" class="size-checkbox-input" value="${size}" style="display:none;">
-            <span class="size-chip" style="padding: 6px 12px; border: 1px solid #ccc; border-radius: 20px; display: inline-block; transition: all 0.2s; font-size: 0.9rem;">${size}</span>
+    const sizeOptionsHTML = STANDARD_SIZES.map(size => `
+        <label style="margin-right: 10px; margin-bottom: 5px; display: inline-flex; align-items: center;">
+            <input type="checkbox" name="product_size_option" value="${size}" class="size-checkbox"> 
+            ${size}
         </label>
     `).join('');
 
@@ -1937,29 +1984,44 @@ export const renderAdminPage = (allProducts, allUsers, allViewers, allTransactio
                         <div class="form-grid">
                             <div class="form-group"><label for="product-id">Product ID</label><input type="text" id="product-id" required></div>
                             <div class="form-group"><label for="product-title">Title</label><input type="text" id="product-title" required></div>
-                            ${isMainAdmin ? `
-                            <div id="ai-image-section" style="margin-top:1.5rem; padding:1rem; background-color:#f0f7ff; border-radius:8px; border-left:4px solid var(--corporate-blue); grid-column: 1 / -1;">
-                                <h3 style="margin-top:0; margin-bottom:1rem; color:var(--corporate-blue);">🤖 AI-Powered Image Search</h3>
-                                <p style="margin:0.5rem 0 0.5rem 0; font-size:0.9rem; color:#666;">Enter a title and click search to find product images.</p>
-                                <button type="button" id="ai-search-images-btn" style="padding:8px 16px; background-color:var(--corporate-blue); color:white; border:none; border-radius:4px; cursor:pointer; font-weight:600;">Search Images from Title</button>
-                                <div id="ai-images-status" style="margin-top:10px; font-size:0.9rem; color:#666; min-height: 20px;"></div>
-                            </div>
-                            ` : ''}
                             <div class="form-group"><label for="product-currentPrice">Current Price</label><input type="number" id="product-currentPrice" required></div>
                             <div class="form-group"><label for="product-oldPrice">Old Price</label><input type="number" id="product-oldPrice" required></div>
                             <div class="form-group"><label for="product-category">Category</label><input type="text" id="product-category" value="${isMainAdmin ? '' : mappedSellerCategory}" ${!isMainAdmin ? 'readonly' : ''} required></div>
-                            <div class="form-group" id="product-image-url-group"><label for="product-image">Main Image URL (Optional if uploading)</label><input type="text" id="product-image"></div>
+                            <div class="form-group">
+                                <label for="product-image">Main Image URL</label>
+                                <input type="text" id="product-image" required>
+                                <label for="product-image-file" style="margin-top:0.35rem; display:block; font-size:0.85rem; color:#555;">or Upload Main Image</label>
+                                <input type="file" id="product-image-file" accept="image/*">
+                            </div>
+                            <div id="main-image-preview-container" style="margin-top:8px; display:none;">
+                                <img id="main-image-preview" src="" alt="Main Image Preview" style="max-width:150px; max-height:150px; object-fit:cover; border-radius:6px; box-shadow:0 2px 8px rgba(0,0,0,0.1);" onerror="this.style.display='none'; document.getElementById('main-image-preview-error').style.display='block';">
+                                <div id="main-image-preview-error" style="color:#d32f2f; font-size:0.85rem; margin-top:4px; display:none;">⚠️ Image failed to load. Check URL.</div>
+                            </div>
                             <div id="carousel-image-urls" class="form-group full-width">
                                 <label>Carousel Image URLs (up to 4)</label>
                                 <div class="form-grid">
-                                    <input type="text" id="carousel-url-1" placeholder="Carousel Image 1 URL">
-                                    <input type="text" id="carousel-url-2" placeholder="Carousel Image 2 URL">
-                                    <input type="text" id="carousel-url-3" placeholder="Carousel Image 3 URL">
-                                    <input type="text" id="carousel-url-4" placeholder="Carousel Image 4 URL">
+                                    <div style="display:flex; flex-direction:column; gap:4px;"><input type="text" id="carousel-url-1" placeholder="Carousel Image 1 URL"><input type="file" id="carousel-file-1" accept="image/*"></div>
+                                    <div style="display:flex; flex-direction:column; gap:4px;"><input type="text" id="carousel-url-2" placeholder="Carousel Image 2 URL"><input type="file" id="carousel-file-2" accept="image/*"></div>
+                                    <div style="display:flex; flex-direction:column; gap:4px;"><input type="text" id="carousel-url-3" placeholder="Carousel Image 3 URL"><input type="file" id="carousel-file-3" accept="image/*"></div>
+                                    <div style="display:flex; flex-direction:column; gap:4px;"><input type="text" id="carousel-url-4" placeholder="Carousel Image 4 URL"><input type="file" id="carousel-file-4" accept="image/*"></div>
+                                </div>
+                                <div id="carousel-images-preview-container" style="display:flex; gap:8px; flex-wrap:wrap; margin-top:8px;">
+                                    <div id="carousel-preview-1-wrapper" style="display:none; position:relative;">
+                                        <img id="carousel-preview-1" src="" alt="Carousel 1" style="width:120px; height:120px; object-fit:cover; border-radius:6px; box-shadow:0 2px 8px rgba(0,0,0,0.1);" onerror="document.getElementById('carousel-preview-1-wrapper').style.display='none';">
+                                    </div>
+                                    <div id="carousel-preview-2-wrapper" style="display:none; position:relative;">
+                                        <img id="carousel-preview-2" src="" alt="Carousel 2" style="width:120px; height:120px; object-fit:cover; border-radius:6px; box-shadow:0 2px 8px rgba(0,0,0,0.1);" onerror="document.getElementById('carousel-preview-2-wrapper').style.display='none';">
+                                    </div>
+                                    <div id="carousel-preview-3-wrapper" style="display:none; position:relative;">
+                                        <img id="carousel-preview-3" src="" alt="Carousel 3" style="width:120px; height:120px; object-fit:cover; border-radius:6px; box-shadow:0 2px 8px rgba(0,0,0,0.1);" onerror="document.getElementById('carousel-preview-3-wrapper').style.display='none';">
+                                    </div>
+                                    <div id="carousel-preview-4-wrapper" style="display:none; position:relative;">
+                                        <img id="carousel-preview-4" src="" alt="Carousel 4" style="width:120px; height:120px; object-fit:cover; border-radius:6px; box-shadow:0 2px 8px rgba(0,0,0,0.1);" onerror="document.getElementById('carousel-preview-4-wrapper').style.display='none';">
+                                    </div>
                                 </div>
                             </div>
                             <div class="form-group"><label for="product-description">Description</label><textarea id="product-description" placeholder="Enter product description (optional - AI will generate if blank)" rows="4"></textarea><div id="ai-desc-status" style="font-size:0.85rem; margin-top:5px; font-style:italic;"></div></div>
-                            <div class="form-group" id="product-images-upload-group"><label id="product-images-label">Or Upload up to 3 images</label><input type="file" id="product-images" accept="image/*" multiple></div>
+                            <div class="form-group"><label>Or Upload up to 3 images</label><input type="file" id="product-images" accept="image/*" multiple></div>
                             <div id="product-images-preview" class="images-preview" style="display:flex; gap:8px; margin-top:8px;"></div>
                             <input type="hidden" id="product-thumbnails-hidden">
                             <div class="form-group"><label>Track Stock?</label><input type="checkbox" id="product-stockToggle"></div>
@@ -1981,30 +2043,40 @@ export const renderAdminPage = (allProducts, allUsers, allViewers, allTransactio
                             <!-- CLOTHING SIZE SECTION -->
                             ${isClothesAdmin ? `
                             <div id="clothing-size-section" style="margin-top: 1.5rem; padding: 1rem; background-color: #f9f9f9; border-radius: 8px;">
-                                <label style="display:block; margin-bottom: 10px; font-weight: 600;">Available Clothing Sizes (Click to select multiple)</label>
-                                <div id="size-checkbox-container" style="display: flex; flex-wrap: wrap; gap: 5px;">
-                                    ${sizeCheckboxesHTML}
-                                </div>
-                                <select id="product-sizes-select" multiple class="admin-input" style="display:none;">
+                                <label style="display:block; margin-bottom: 10px; font-weight: 600;">Available Clothing Sizes (Select multiple)</label>
+                                <select id="product-sizes-select" multiple class="admin-input" style="width: 100%; height: 150px; padding: 10px; border: 1px solid var(--border-color); border-radius: 8px;">
                                     ${STANDARD_SIZES.map(size => `<option value="${size}">${size}</option>`).join('')}
                                 </select>
+                                <small style="display:block; margin-top:5px; color:#666;">Hold Ctrl (Windows) or Cmd (Mac) to select multiple sizes.</small>
                             </div>
                             ` : ''}
 
                             ${isMainAdmin ? `
                             <div id="ai-features-section" style="margin-top:1.5rem; padding:1rem; background-color:#f0f7ff; border-radius:8px; border-left:4px solid var(--primary-blue);">
-                                <h3 style="margin-top:0; margin-bottom:1rem; color:var(--primary-blue);">🤖 AI-Powered Features</h3>
+                                <h3 style="margin-top:0; margin-bottom:1rem; color:var(--primary-blue);">🤖 AI-Generated Features</h3>
                                 <div style="margin-bottom:1rem;">
-                                    <label style="display:block; margin-bottom:0.5rem; font-weight:600;">Product Features (Auto-generated)</label>
-                                    <p style="margin:0.5rem 0 0.5rem 0; font-size:0.9rem; color:#666;">Type a product title above and we'll generate relevant features</p>
-                                    <div id="product-features-container" style="display:flex; flex-direction:column; gap:8px; margin-top:8px;">
-                                    </div>
-                                    <button type="button" id="ai-generate-features-btn" style="margin-top:10px; padding:8px 16px; background-color:var(--primary-blue); color:white; border:none; border-radius:4px; cursor:pointer; font-weight:600;">Generate Features from Title</button>
+                                    <label style="display:block; margin-bottom:0.5rem; font-weight:600;">Product Features</label>
+                                    <p style="margin:0.5rem 0 0.5rem 0; font-size:0.9rem; color:#666;">Features are generated automatically from the product title.</p>
+                                    <div id="product-features-container" style="display:flex; flex-direction:column; gap:8px; margin-top:8px;"></div>
+                                    <button type="button" id="ai-generate-features-btn" style="margin-top:10px; padding:8px 16px; background-color:var(--primary-blue); color:white; border:none; border-radius:4px; cursor:pointer; font-weight:600;">Regenerate Features</button>
                                     <button type="button" id="ai-clear-features-btn" style="margin-top:10px; margin-left:8px; padding:8px 16px; background-color:#ccc; color:#333; border:none; border-radius:4px; cursor:pointer;">Clear All</button>
                                     <div id="ai-features-status" style="margin-top:10px; font-size:0.9rem; color:#666; display:none;"></div>
+                                    <div id="ai-images-status" style="margin-top:10px; font-size:0.9rem; color:#666; display:none;"></div>
                                 </div>
                             </div>
-                            ` : ''}
+                            ` : `
+                            <div id="manual-features-section" style="margin-top:1.5rem; padding:1rem; background-color:#f9f9f9; border-radius:8px; border-left:4px solid #999;">
+                                <h3 style="margin-top:0; margin-bottom:1rem; color:#333;">Manual Product Features</h3>
+                                <div style="margin-bottom:1rem;">
+                                    <label style="display:block; margin-bottom:0.5rem; font-weight:600;">Product Features</label>
+                                    <p style="margin:0.5rem 0 0.5rem 0; font-size:0.9rem; color:#666;">Add / edit feature bullets manually.</p>
+                                    <input type="text" id="manual-feature-input" placeholder="Enter a new feature" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:4px; margin-bottom:8px;" />
+                                    <div id="product-features-container" style="display:flex; flex-direction:column; gap:8px; margin-top:8px;"></div>
+                                    <button type="button" id="manual-add-feature-btn" style="margin-top:10px; padding:8px 16px; background-color:var(--secondary-blue); color:white; border:none; border-radius:4px; cursor:pointer; font-weight:600;">Add Feature</button>
+                                    <button type="button" id="ai-clear-features-btn" style="margin-top:10px; margin-left:8px; padding:8px 16px; background-color:#ccc; color:#333; border:none; border-radius:4px; cursor:pointer;">Clear All</button>
+                                </div>
+                            </div>
+                            `}
                             
                             <div class="form-group"><label>On Sale?</label><input type="checkbox" id="product-onSale"></div>
                         </div>
@@ -2303,8 +2375,6 @@ const attachAdminEventListeners = (isMainAdmin, allProducts, relevantTransaction
             if (input) input.value = '';
         }
     
-        const aiImagesStatus = document.getElementById('ai-images-status');
-        if (aiImagesStatus) aiImagesStatus.textContent = '';
         const featuresContainer = document.getElementById('product-features-container');
         if (featuresContainer) {
             featuresContainer.innerHTML = '<p style="font-size:0.9rem; color:#999; margin:0;">No features yet. Generate some using the button below.</p>';
@@ -2314,26 +2384,18 @@ const attachAdminEventListeners = (isMainAdmin, allProducts, relevantTransaction
             aiStatusDiv.textContent = '';
             aiStatusDiv.style.display = 'none';
         }
+        const aiImagesStatus = document.getElementById('ai-images-status');
+        if (aiImagesStatus) {
+            aiImagesStatus.textContent = '';
+            aiImagesStatus.style.display = 'none';
+        }
         const descEl = document.getElementById('product-description');
         if (descEl) descEl.value = '';
         const aiDescStatus = document.getElementById('ai-desc-status');
         if (aiDescStatus) aiDescStatus.textContent = '';
 
-        // Reset the size checkboxes
-        const sizeCheckboxes = document.querySelectorAll('.size-checkbox-input');
-        sizeCheckboxes.forEach(cb => {
-            cb.checked = false;
-            const span = cb.nextElementSibling;
-            if(span) {
-                span.style.backgroundColor = 'transparent';
-                span.style.color = 'var(--text-dark)';
-                span.style.borderColor = '#ccc';
-            }
-        });
-        const hiddenSelect = document.getElementById('product-sizes-select');
-        if(hiddenSelect) {
-             Array.from(hiddenSelect.options).forEach(opt => opt.selected = false);
-        }
+        const sizeSelect = document.getElementById('product-sizes-select');
+        if (sizeSelect) sizeSelect.selectedIndex = -1;
 
         const validationMsg = document.getElementById('product-validation-msg');
         if (validationMsg) { validationMsg.textContent = ''; validationMsg.style.display = 'none'; }
@@ -2361,62 +2423,6 @@ const attachAdminEventListeners = (isMainAdmin, allProducts, relevantTransaction
         document.getElementById('cancel-edit-btn').style.display = 'none';
         document.querySelector('form h3').textContent = 'Add New Product';
     });
-
-    // --- NEW: Handle category input change for clothes products ---
-    const categoryInput = document.getElementById('product-category');
-    if (categoryInput) {
-        categoryInput.addEventListener('input', () => {
-            const isClothes = ['clothes', 'clothing', 'womens-clothes', 'mens-clothes'].includes(categoryInput.value.toLowerCase());
-            const imageUrlGroup = document.getElementById('product-image-url-group');
-            const carouselUrlGroup = document.getElementById('carousel-image-urls');
-            const uploadLabel = document.getElementById('product-images-label');
-
-            if (isClothes) {
-                if (imageUrlGroup) imageUrlGroup.style.display = 'none';
-                if (carouselUrlGroup) carouselUrlGroup.style.display = 'none';
-                if (uploadLabel) uploadLabel.textContent = 'Upload up to 3 images (Required for new clothes products)';
-            } else {
-                if (imageUrlGroup) imageUrlGroup.style.display = '';
-                if (carouselUrlGroup) carouselUrlGroup.style.display = '';
-                if (uploadLabel) uploadLabel.textContent = 'Or Upload up to 3 images';
-            }
-        });
-    }
-
-    // Handle Size Checkbox Clicks and Sync with Hidden Select
-    const sizeContainer = document.getElementById('size-checkbox-container');
-    if (sizeContainer) {
-        sizeContainer.addEventListener('change', (e) => {
-            if (e.target.classList.contains('size-checkbox-input')) {
-                const checkbox = e.target;
-                const value = checkbox.value;
-                const isChecked = checkbox.checked;
-                
-                // Update Visual Style
-                const span = checkbox.nextElementSibling;
-                if(span) {
-                    if (isChecked) {
-                        span.style.backgroundColor = 'var(--corporate-blue)';
-                        span.style.color = 'white';
-                        span.style.borderColor = 'var(--corporate-blue)';
-                    } else {
-                        span.style.backgroundColor = 'transparent';
-                        span.style.color = 'var(--text-dark)';
-                        span.style.borderColor = '#ccc';
-                    }
-                }
-
-                // Sync with Hidden Select
-                const hiddenSelect = document.getElementById('product-sizes-select');
-                if (hiddenSelect) {
-                    const option = Array.from(hiddenSelect.options).find(opt => opt.value === value);
-                    if (option) {
-                        option.selected = isChecked;
-                    }
-                }
-            }
-        });
-    }
 
     const stockToggle = document.getElementById('product-stockToggle');
     const stockFieldGroup = document.getElementById('stock-field-group');
@@ -2581,7 +2587,7 @@ const attachAdminEventListeners = (isMainAdmin, allProducts, relevantTransaction
                 colorsPreview.appendChild(circle);
             }
         });
-    };
+    }
 
     colorInputs.forEach(id => {
         const input = document.getElementById(id);
@@ -2591,10 +2597,103 @@ const attachAdminEventListeners = (isMainAdmin, allProducts, relevantTransaction
         }
     });
 
+    // --- IMAGE URL PREVIEW HANDLERS ---
+    const updateImagePreview = (inputId, previewId) => {
+        const input = document.getElementById(inputId);
+        const preview = document.getElementById(previewId);
+        if (inputId === 'product-image') {
+            const previewContainer = document.getElementById('main-image-preview-container');
+            const previewError = document.getElementById('main-image-preview-error');
+            if (input && input.value.trim()) {
+                preview.src = input.value;
+                previewContainer.style.display = 'block';
+                previewError.style.display = 'none';
+            } else {
+                previewContainer.style.display = 'none';
+            }
+        } else if (previewId.startsWith('carousel-preview-')) {
+            const num = previewId.split('-')[2];
+            const previewWrapper = document.getElementById(`carousel-preview-${num}-wrapper`);
+            if (input && input.value.trim()) {
+                preview.src = input.value;
+                previewWrapper.style.display = 'block';
+            } else {
+                previewWrapper.style.display = 'none';
+            }
+        }
+    };
+
+    // Helper for image file upload
+    const uploadImageFile = async (file) => {
+        if (!file) return null;
+        try {
+            const fd = new FormData();
+            fd.append('image', file);
+            const res = await fetch('/api/upload/product', { method: 'POST', body: fd });
+            if (!res.ok) throw new Error('Upload failed');
+            const data = await res.json();
+            return data.image || null;
+        } catch (err) {
+            console.error('Image upload failed:', err);
+            return null;
+        }
+    };
+
+    const attachFileUploadToUrlField = (fileInputId, urlInputId, previewId) => {
+        const fileInput = document.getElementById(fileInputId);
+        if (!fileInput) return;
+        fileInput.addEventListener('change', async () => {
+            const file = fileInput.files[0];
+            if (!file) return;
+            const uploadedUrl = await uploadImageFile(file);
+            if (uploadedUrl) {
+                const urlInput = document.getElementById(urlInputId);
+                if (urlInput) urlInput.value = uploadedUrl;
+                updateImagePreview(urlInputId, previewId);
+            }
+        });
+    };
+
+    // Set up event listeners for main image and carousel URLs
+    document.getElementById('product-image')?.addEventListener('input', () => updateImagePreview('product-image', 'main-image-preview'));
+    document.getElementById('product-image')?.addEventListener('change', () => updateImagePreview('product-image', 'main-image-preview'));
+    attachFileUploadToUrlField('product-image-file', 'product-image', 'main-image-preview');
+
+    [1, 2, 3, 4].forEach(num => {
+        const input = document.getElementById(`carousel-url-${num}`);
+        if (input) {
+            input.addEventListener('input', () => updateImagePreview(`carousel-url-${num}`, `carousel-preview-${num}`));
+            input.addEventListener('change', () => updateImagePreview(`carousel-url-${num}`, `carousel-preview-${num}`));
+        }
+        attachFileUploadToUrlField(`carousel-file-${num}`, `carousel-url-${num}`, `carousel-preview-${num}`);
+    });
+
     const featuresContainer = document.getElementById('product-features-container');
     const aiStatusDiv = document.getElementById('ai-features-status');
     const aiGenerateFeaturesBtn = document.getElementById('ai-generate-features-btn');
     const aiClearFeaturesBtn = document.getElementById('ai-clear-features-btn');
+
+    const createFeatureInput = (featureValue = '') => {
+        if (!featuresContainer) return;
+        const featureDiv = document.createElement('div');
+        featureDiv.style.cssText = 'display:flex; gap:8px; margin-bottom:8px; align-items:center;';
+
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.value = featureValue;
+        input.className = 'ai-feature-input';
+        input.style.cssText = 'flex:1; padding:8px; border:1px solid #ddd; border-radius:4px; font-size:0.9rem;';
+
+        const removeBtn = document.createElement('button');
+        removeBtn.type = 'button';
+        removeBtn.textContent = '✕';
+        removeBtn.style.cssText = 'padding:6px 12px; background-color:#ff4444; color:white; border:none; border-radius:4px; cursor:pointer; font-weight:bold;';
+        removeBtn.onclick = (e) => { e.preventDefault(); featureDiv.remove(); };
+
+        featureDiv.appendChild(input);
+        featureDiv.appendChild(removeBtn);
+        featuresContainer.appendChild(featureDiv);
+    };
 
     const displayFeatures = (features) => {
         if (!featuresContainer || !Array.isArray(features)) return;
@@ -2603,24 +2702,7 @@ const attachAdminEventListeners = (isMainAdmin, allProducts, relevantTransaction
             featuresContainer.innerHTML = '<p style="font-size:0.9rem; color:#999; margin:0;">No features generated. Try again.</p>';
             return;
         }
-        features.forEach((feature, index) => {
-            const featureDiv = document.createElement('div');
-            featureDiv.style.cssText = 'display:flex; gap:8px; margin-bottom:8px; align-items:center;';
-            const input = document.createElement('input');
-            input.type = 'text';
-            input.value = feature;
-            input.className = 'ai-feature-input';
-            input.dataset.featureIndex = index;
-            input.style.cssText = 'flex:1; padding:8px; border:1px solid #ddd; border-radius:4px; font-size:0.9rem;';
-            const removeBtn = document.createElement('button');
-            removeBtn.type = 'button';
-            removeBtn.textContent = '✕';
-            removeBtn.style.cssText = 'padding:6px 12px; background-color:#ff4444; color:white; border:none; border-radius:4px; cursor:pointer; font-weight:bold;';
-            removeBtn.onclick = (e) => { e.preventDefault(); featureDiv.remove(); };
-            featureDiv.appendChild(input);
-            featureDiv.appendChild(removeBtn);
-            featuresContainer.appendChild(featureDiv);
-        });
+        features.forEach((feature) => createFeatureInput(feature));
     };
 
     const setStatus = (message, isError = false) => {
@@ -2687,10 +2769,63 @@ const attachAdminEventListeners = (isMainAdmin, allProducts, relevantTransaction
         });
     }
 
+    const manualAddFeatureBtn = document.getElementById('manual-add-feature-btn');
+    if (manualAddFeatureBtn) {
+        manualAddFeatureBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            if (!featuresContainer) return;
+
+            const manualFeatureInput = document.getElementById('manual-feature-input');
+            const featureText = manualFeatureInput?.value?.trim() || '';
+
+            if (!featureText) {
+                if (manualFeatureInput) {
+                    manualFeatureInput.focus();
+                }
+                return;
+            }
+
+            if (featuresContainer.querySelector('p') && featuresContainer.childElementCount === 1) {
+                featuresContainer.innerHTML = '';
+            }
+
+            createFeatureInput(featureText);
+            if (manualFeatureInput) {
+                manualFeatureInput.value = '';
+                manualFeatureInput.focus();
+            }
+        });
+    }
+
+    const manualFeatureInput = document.getElementById('manual-feature-input');
+    if (manualFeatureInput) {
+        manualFeatureInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                if (!featuresContainer) return;
+
+                const featureText = manualFeatureInput.value?.trim() || '';
+
+                if (!featureText) {
+                    return;
+                }
+
+                if (featuresContainer.querySelector('p') && featuresContainer.childElementCount === 1) {
+                    featuresContainer.innerHTML = '';
+                }
+
+                createFeatureInput(featureText);
+                manualFeatureInput.value = '';
+                manualFeatureInput.focus();
+            }
+        });
+    }
+
     const productTitleInput = document.getElementById('product-title');
     const descriptionInput = document.getElementById('product-description');
     const aiDescStatus = document.getElementById('ai-desc-status');
-    const aiFeaturesStatus = document.getElementById('ai-features-status'); 
+    const aiFeaturesStatus = document.getElementById('ai-features-status');
+    const aiImagesStatus = document.getElementById('ai-images-status');
     
     let autoGenTimer;
 
@@ -2704,10 +2839,19 @@ const attachAdminEventListeners = (isMainAdmin, allProducts, relevantTransaction
                  if(aiDescStatus) aiDescStatus.textContent = '';
                  return;
             }
+            
+            const isDescEmpty = !descriptionInput.value || descriptionInput.dataset.autoGenerated;
+            const areImagesEmpty = !document.getElementById('product-image').value;
+            const areFeaturesEmpty = !featuresContainer || featuresContainer.querySelectorAll('.ai-feature-input').length === 0;
 
-            if (aiDescStatus && (!descriptionInput.value || descriptionInput.dataset.autoGenerated)) {
+            if (aiDescStatus && isDescEmpty) {
                 aiDescStatus.textContent = 'Typing...';
                 aiDescStatus.style.color = '#666';
+            }
+            if (aiFeaturesStatus && areFeaturesEmpty) {
+                aiFeaturesStatus.style.display = 'block';
+                aiFeaturesStatus.textContent = 'Typing...';
+                aiFeaturesStatus.style.color = '#666';
             }
 
             autoGenTimer = setTimeout(async () => {
@@ -2718,12 +2862,68 @@ const attachAdminEventListeners = (isMainAdmin, allProducts, relevantTransaction
 
                 console.log('⚡ Triggering AI Auto-generation for:', titleValue);
 
-                if (descriptionInput && (descriptionInput.value.trim() === '' || descriptionInput.dataset.autoGenerated === "true")) {
+                // --- Auto-generate Images ---
+                if (areImagesEmpty) {
+                    if (aiImagesStatus) {
+                        aiImagesStatus.style.display = 'block';
+                        aiImagesStatus.textContent = '✨ Finding images...';
+                        aiImagesStatus.style.color = 'var(--corporate-blue)';
+                    }
+                    try {
+                        const res = await fetch('/api/ai/generate-images', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ title: titleValue })
+                        });
+                        const data = await res.json();
+                        if (data.success && data.images && data.images.length > 0) {
+                            document.getElementById('product-image').value = data.images[0] || '';
+                            // Update main image preview
+                            const mainImagePreview = document.getElementById('main-image-preview');
+                            const mainImagePreviewContainer = document.getElementById('main-image-preview-container');
+                            if (mainImagePreview && data.images[0]) {
+                                mainImagePreview.src = data.images[0];
+                                mainImagePreviewContainer.style.display = 'block';
+                            }
+                            
+                            [1, 2, 3, 4].forEach((num, i) => {
+                                const input = document.getElementById(`carousel-url-${num}`);
+                                if (input) {
+                                    input.value = data.images[i + 1] || '';
+                                    // Update carousel image preview
+                                    const previewWrapper = document.getElementById(`carousel-preview-${num}-wrapper`);
+                                    const previewImg = document.getElementById(`carousel-preview-${num}`);
+                                    if (data.images[i + 1] && previewImg) {
+                                        previewImg.src = data.images[i + 1];
+                                        previewWrapper.style.display = 'block';
+                                    }
+                                }
+                            });
+                            if (aiImagesStatus) {
+                                aiImagesStatus.textContent = `✓ Found ${data.images.length} images!`;
+                                aiImagesStatus.style.color = 'green';
+                            }
+                        } else {
+                            if (aiImagesStatus) {
+                                aiImagesStatus.textContent = '❌ Could not find images.';
+                                aiImagesStatus.style.color = '#d32f2f';
+                            }
+                        }
+                    } catch (err) {
+                        console.error('AI Image Error:', err);
+                        if (aiImagesStatus) {
+                            aiImagesStatus.textContent = '❌ Image search failed.';
+                            aiImagesStatus.style.color = '#d32f2f';
+                        }
+                    }
+                }
+
+                // --- Auto-generate Description ---
+                if (descriptionInput && isDescEmpty) {
                     if(aiDescStatus) {
                         aiDescStatus.textContent = '✨ Generating unique description...';
                         aiDescStatus.style.color = 'var(--corporate-blue)';
                     }
-
                     try {
                         const res = await fetch('/api/ai/generate-description', {
                             method: 'POST',
@@ -2731,14 +2931,12 @@ const attachAdminEventListeners = (isMainAdmin, allProducts, relevantTransaction
                             body: JSON.stringify({ title: titleValue })
                         });
                         const data = await res.json();
-                        
                         if (data.success && data.description) {
                             descriptionInput.value = data.description;
                             descriptionInput.dataset.autoGenerated = "true";
                             if(aiDescStatus) {
                                 aiDescStatus.textContent = '✓ Description generated';
                                 aiDescStatus.style.color = 'green';
-                                setTimeout(() => { if(aiDescStatus) aiDescStatus.textContent = ''; }, 4000);
                             }
                         }
                     } catch (err) {
@@ -2747,21 +2945,25 @@ const attachAdminEventListeners = (isMainAdmin, allProducts, relevantTransaction
                     }
                 }
 
-                const existingFeatures = featuresContainer ? featuresContainer.querySelectorAll('.ai-feature-input') : [];
-                
-                if (featuresContainer && existingFeatures.length === 0) {
+                // --- Auto-generate Features ---
+                if (featuresContainer && areFeaturesEmpty) {
                     if (aiFeaturesStatus) {
                         aiFeaturesStatus.style.display = 'block';
                         aiFeaturesStatus.textContent = '✨ Generating features...';
                         aiFeaturesStatus.style.color = 'var(--corporate-blue)';
                     }
-
-                    await generateFeatures(); 
-                    
-                    if (aiFeaturesStatus) {
-                        setTimeout(() => { aiFeaturesStatus.style.display = 'none'; }, 4000);
-                    }
+                    await generateFeatures();
                 }
+
+                // Clear status messages after a while
+                setTimeout(() => {
+                    if(aiDescStatus) aiDescStatus.textContent = '';
+                    if (aiFeaturesStatus) aiFeaturesStatus.style.display = 'none';
+                    if (aiImagesStatus) {
+                        aiImagesStatus.textContent = '';
+                        aiImagesStatus.style.display = 'none';
+                    }
+                }, 4000);
 
             }, 1500);
         });
@@ -2773,74 +2975,6 @@ const attachAdminEventListeners = (isMainAdmin, allProducts, relevantTransaction
                 }
             });
         }
-    }
-
-    const aiSearchImagesBtn = document.getElementById('ai-search-images-btn');
-
-    const runImageSearch = async () => {
-        const titleValue = productTitleInput.value.trim();
-        const imagesStatusDiv = document.getElementById('ai-images-status');
-        const mainImageUrlInput = document.getElementById('product-image');
-        const carouselUrlInputs = [
-            document.getElementById('carousel-url-1'),
-            document.getElementById('carousel-url-2'),
-            document.getElementById('carousel-url-3'),
-            document.getElementById('carousel-url-4'),
-        ];
-        
-        if (titleValue.length < 3) {
-            if (imagesStatusDiv) {
-                imagesStatusDiv.textContent = 'Please enter a longer title to search for images.';
-                imagesStatusDiv.style.color = '#d32f2f';
-            }
-            return;
-        }
-        
-        if (imagesStatusDiv) {
-            imagesStatusDiv.textContent = '⏳ Searching for images...';
-            imagesStatusDiv.style.color = 'var(--corporate-blue)';
-        }
-        if (aiSearchImagesBtn) aiSearchImagesBtn.disabled = true;
-
-        try {
-            const response = await fetch('/api/ai/generate-images', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ title: titleValue })
-            });
-            const data = await response.json();
-
-            if (data.success && data.images && data.images.length > 0) {
-                 if (mainImageUrlInput) mainImageUrlInput.value = data.images[0] || '';
-                 carouselUrlInputs.forEach((input, i) => {
-                     if (input) input.value = data.images[i+1] || '';
-                 });
-                 if (imagesStatusDiv) {
-                     imagesStatusDiv.textContent = `✓ Found ${data.images.length} images! Fields populated.`;
-                     imagesStatusDiv.style.color = '#2e7d32';
-                 }
-            } else {
-                 if (imagesStatusDiv) {
-                     imagesStatusDiv.textContent = '❌ No images found. Please try a different title or add URLs manually.';
-                     imagesStatusDiv.style.color = '#d32f2f';
-                 }
-            }
-        } catch (err) {
-            console.error(err);
-            if (imagesStatusDiv) {
-                imagesStatusDiv.textContent = `Error: ${err.message || 'Image search failed. Check server logs and API keys.'}`;
-                imagesStatusDiv.style.color = '#d32f2f';
-            }
-        } finally {
-            if (aiSearchImagesBtn) aiSearchImagesBtn.disabled = false;
-        }
-    };
-    
-    if (aiSearchImagesBtn) {
-        aiSearchImagesBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-            runImageSearch();
-        });
     }
 
     const allCuratedIds = [
@@ -3396,122 +3530,6 @@ export const initHamburgerMenu = () => {
     });
 };
 
-// --- AUTH RENDERERS (Added back) ---
-
-export const renderLoginPage = () => {
-    getAppRoot().innerHTML = `
-        <div class="page-container" style="max-width: 500px; margin-top: 3rem;">
-            <div style="background: var(--white); padding: 2.5rem; border-radius: var(--border-radius); box-shadow: var(--shadow-medium);">
-                <h1 style="text-align: center; color: var(--corporate-blue); margin-bottom: 2rem;">Welcome Back</h1>
-                <form id="login-form">
-                    <div class="form-group">
-                        <label for="email">Email Address</label>
-                        <input type="email" id="email" name="email" required autocomplete="email">
-                    </div>
-                    <div class="form-group">
-                        <label for="password">Password</label>
-                        <input type="password" id="password" name="password" required autocomplete="current-password">
-                    </div>
-                    <div id="login-message" class="form-message" style="text-align: center;"></div>
-                    <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem; padding: 15px;">Login</button>
-                    <div style="text-align: center; margin-top: 1.5rem;">
-                        <a href="#forgot" style="color: var(--text-light); text-decoration: none; font-size: 0.9rem;">Forgot Password?</a>
-                        <br><br>
-                        <span style="color: var(--text-light);">New here? </span><a href="#register" style="color: var(--corporate-blue); font-weight: 600; text-decoration: none;">Create an account</a>
-                    </div>
-                </form>
-            </div>
-        </div>
-    `;
-};
-
-export const renderRegisterPage = () => {
-    getAppRoot().innerHTML = `
-        <div class="page-container" style="max-width: 500px; margin-top: 3rem;">
-            <div style="background: var(--white); padding: 2.5rem; border-radius: var(--border-radius); box-shadow: var(--shadow-medium);">
-                <h1 style="text-align: center; color: var(--corporate-blue); margin-bottom: 2rem;">Create Account</h1>
-                <form id="register-form">
-                    <div class="form-group">
-                        <label for="name">Full Name</label>
-                        <input type="text" id="name" name="name" required autocomplete="name">
-                    </div>
-                    <div class="form-group">
-                        <label for="email">Email Address</label>
-                        <input type="email" id="email" name="email" required autocomplete="email">
-                    </div>
-                    <div class="form-group">
-                        <label for="password">Password</label>
-                        <input type="password" id="password" name="password" required autocomplete="new-password">
-                    </div>
-                    <div class="form-group">
-                        <label for="sellerType">Account Type</label>
-                        <select id="sellerType" name="sellerType" style="width: 100%; padding: 12px; border: 1px solid var(--border-color); border-radius: 8px;">
-                            <option value="customer">Customer (Buy Products)</option>
-                            <option value="clothes">Clothing Reseller</option>
-                            <option value="furniture">Furniture Reseller</option>
-                            <option value="kids">Kids Store Reseller</option>
-                        </select>
-                        <small style="display:block; margin-top:5px; color:#666; font-size:0.85rem;">Reseller accounts require admin approval before logging in.</small>
-                    </div>
-                    <div id="register-message" class="form-message" style="text-align: center;"></div>
-                    <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem; padding: 15px;">Sign Up</button>
-                    <div style="text-align: center; margin-top: 1.5rem;">
-                        <span style="color: var(--text-light);">Already have an account? </span><a href="#login" style="color: var(--corporate-blue); font-weight: 600; text-decoration: none;">Login</a>
-                    </div>
-                </form>
-            </div>
-        </div>
-    `;
-};
-
-export const renderForgotPage = () => {
-    getAppRoot().innerHTML = `
-        <div class="page-container" style="max-width: 500px; margin-top: 3rem;">
-            <div style="background: var(--white); padding: 2.5rem; border-radius: var(--border-radius); box-shadow: var(--shadow-medium);">
-                <h1 style="text-align: center; color: var(--corporate-blue); margin-bottom: 2rem;">Reset Password</h1>
-                <form id="forgot-form">
-                    <div class="form-group">
-                        <label for="email">Email Address</label>
-                        <input type="email" id="email" name="email" required autocomplete="email">
-                    </div>
-                    <div id="forgot-message" class="form-message" style="text-align: center;"></div>
-                    <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem; padding: 15px;">Send Reset Link</button>
-                    <div style="text-align: center; margin-top: 1.5rem;">
-                        <a href="#login" style="color: var(--corporate-blue); font-weight: 600; text-decoration: none;">Back to Login</a>
-                    </div>
-                </form>
-            </div>
-        </div>
-    `;
-};
-
-export const renderResetPage = (token) => {
-    getAppRoot().innerHTML = `
-        <div class="page-container" style="max-width: 500px; margin-top: 3rem;">
-            <div style="background: var(--white); padding: 2.5rem; border-radius: var(--border-radius); box-shadow: var(--shadow-medium);">
-                <h1 style="text-align: center; color: var(--corporate-blue); margin-bottom: 2rem;">Set New Password</h1>
-                <form id="reset-form">
-                    <input type="hidden" name="reset-token" value="${token}">
-                    <div class="form-group">
-                        <label for="password">New Password</label>
-                        <input type="password" id="password" name="password" required autocomplete="new-password">
-                    </div>
-                    <div id="reset-message" class="form-message" style="text-align: center;"></div>
-                    <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem; padding: 15px;">Update Password</button>
-                </form>
-            </div>
-        </div>
-    `;
-};
-
-// --- NEW FUNCTION: RENDER COMBOS PAGE ---
-export const renderCombosPage = (products) => {
-    // This is essentially just calling renderCategoryPage, but we define it 
-    // because the router explicitly tries to call ui.renderCombosPage(products).
-    // "combos" is treated as a special category key in renderCategoryPage already.
-    renderCategoryPage(products, 'combos');
-};
-
 // --- EXPORTED HELPER FUNCTIONS FOR MAIN.JS ---
 
 export const populateProductForm = (productToEdit, allProducts) => {
@@ -3565,18 +3583,6 @@ export const populateProductForm = (productToEdit, allProducts) => {
         
         const sizeSelect = document.getElementById('product-sizes-select');
         if (sizeSelect) sizeSelect.selectedIndex = -1;
-
-        // Reset the size checkboxes
-        const sizeCheckboxes = document.querySelectorAll('.size-checkbox-input');
-        sizeCheckboxes.forEach(cb => {
-            cb.checked = false;
-            const span = cb.nextElementSibling;
-            if(span) {
-                span.style.backgroundColor = 'transparent';
-                span.style.color = 'var(--text-dark)';
-                span.style.borderColor = '#ccc';
-            }
-        });
     };
 
     resetForm();
@@ -3591,6 +3597,14 @@ export const populateProductForm = (productToEdit, allProducts) => {
     document.getElementById('product-oldPrice').value = productToEdit.oldPrice;
     document.getElementById('product-category').value = productToEdit.category;
     document.getElementById('product-image').value = productToEdit.image;
+    
+    // Update main image preview
+    const mainImagePreview = document.getElementById('main-image-preview');
+    const mainImagePreviewContainer = document.getElementById('main-image-preview-container');
+    if (productToEdit.image && mainImagePreview) {
+        mainImagePreview.src = productToEdit.image;
+        mainImagePreviewContainer.style.display = 'block';
+    }
     
     const descEl = document.getElementById('product-description');
     if (descEl) descEl.value = productToEdit.description || '';
@@ -3607,6 +3621,13 @@ export const populateProductForm = (productToEdit, allProducts) => {
         productToEdit.thumbnails.slice(1, 5).forEach((url, index) => {
             if (carouselUrlInputs[index]) {
                 carouselUrlInputs[index].value = url;
+                // Update carousel image preview
+                const previewWrapper = document.getElementById(`carousel-preview-${index + 1}-wrapper`);
+                const previewImg = document.getElementById(`carousel-preview-${index + 1}`);
+                if (url && previewImg) {
+                    previewImg.src = url;
+                    previewWrapper.style.display = 'block';
+                }
             }
         });
     }
@@ -3763,31 +3784,10 @@ export const populateProductForm = (productToEdit, allProducts) => {
     }
 
     if (productToEdit.sizes && productToEdit.sizes.length > 0) {
-        const hiddenSelect = document.getElementById('product-sizes-select');
-        const sizeCheckboxes = document.querySelectorAll('.size-checkbox-input');
-        
-        if (hiddenSelect) {
-            // First clear all
-             Array.from(hiddenSelect.options).forEach(opt => opt.selected = false);
-            
-            // Set based on product sizes
-            productToEdit.sizes.forEach(size => {
-                // Update hidden select
-                const option = Array.from(hiddenSelect.options).find(opt => opt.value === size);
-                if (option) option.selected = true;
-
-                // Update visual checkbox
-                sizeCheckboxes.forEach(cb => {
-                    if (cb.value === size) {
-                        cb.checked = true;
-                        const span = cb.nextElementSibling;
-                        if(span) {
-                            span.style.backgroundColor = 'var(--corporate-blue)';
-                            span.style.color = 'white';
-                            span.style.borderColor = 'var(--corporate-blue)';
-                        }
-                    }
-                });
+        const sizeSelect = document.getElementById('product-sizes-select');
+        if (sizeSelect) {
+            Array.from(sizeSelect.options).forEach(opt => {
+                opt.selected = productToEdit.sizes.includes(opt.value);
             });
         }
     } else {

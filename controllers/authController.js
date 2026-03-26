@@ -1,11 +1,49 @@
 import crypto from 'crypto';
 import User from '../models/userModel.js';
 
+// Password validation helper
+const validatePassword = (password) => {
+  const minLength = 8;
+  const minCapitalLetters = 1;
+  const minNumbers = 2;
+  
+  if (password.length < minLength) {
+    return {
+      valid: false,
+      message: `Password must contain at least ${minLength} characters.`
+    };
+  }
+  
+  const capitalLetterCount = (password.match(/[A-Z]/g) || []).length;
+  if (capitalLetterCount < minCapitalLetters) {
+    return {
+      valid: false,
+      message: `Password must contain at least ${minCapitalLetters} capital letter(s).`
+    };
+  }
+  
+  const numberCount = (password.match(/[0-9]/g) || []).length;
+  if (numberCount < minNumbers) {
+    return {
+      valid: false,
+      message: `Password must contain at least ${minNumbers} number(s).`
+    };
+  }
+  
+  return { valid: true };
+};
+
 // Sign up and log in the user via session
 const signup = async (req, res) => {
   const { name, email, password, sellerType } = req.body;
   
   try {
+    // Validate password requirements
+    const passwordValidation = validatePassword(password);
+    if (!passwordValidation.valid) {
+      return res.status(400).json({ message: passwordValidation.message });
+    }
+
     const existing = await User.findOne({ email });
     if (existing) return res.status(400).json({ message: 'User already exists' });
 
@@ -75,6 +113,12 @@ const resetPassword = async (req, res) => {
   const { token } = req.params;
   const { password } = req.body;
   try {
+    // Validate password requirements
+    const passwordValidation = validatePassword(password);
+    if (!passwordValidation.valid) {
+      return res.status(400).json({ message: passwordValidation.message });
+    }
+
     const user = await User.findOne({ resetPasswordToken: token, resetPasswordExpires: { $gt: Date.now() } });
     if (!user) return res.status(400).json({ message: 'Invalid or expired token' });
     user.password = password;

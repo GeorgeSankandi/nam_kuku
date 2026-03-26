@@ -9,13 +9,13 @@ const getGeminiApiKey = () => process.env.GEMINI_API_KEY;
 let hasLoggedWarning = false;
 const checkGeminiKey = () => {
   if (!hasLoggedWarning && !getGeminiApiKey()) {
-    console.warn('Warning: GEMINI_API_KEY is not set. Real-time feature generation will fail.');
+    console.warn('Warning: GEMINI_API_KEY is not set. Real-time generation will fail.');
     hasLoggedWarning = true;
   }
 };
 
 /**
- * Generate product features using Gemini API with web search
+ * Generate product features using Gemini API
  * @param {string} productTitle - The product title/name
  * @returns {Promise<Array>} Array of feature strings
  */
@@ -48,7 +48,7 @@ Example format:
 
 Product Title: ${productTitle}
 
-Generate realistic features based on current market products with this title. Search your knowledge base for authentic specifications.`;
+Generate realistic features based on current market products with this title.`;
 
     const requestBody = {
       contents: [{ parts: [{ text: prompt }] }],
@@ -119,7 +119,7 @@ export const generateDescriptionWithGemini = async (productTitle, features = [])
       ? `Key features context:\n${features.map(f => `- ${f}`).join('\n')}\n\n`
       : '';
 
-    const prompt = `You are a professional product copywriter for a premium electronics store called NamKuku. 
+    const prompt = `You are a professional product copywriter for a premium electronics store called NAMIX. 
     
 Product Title: "${productTitle}"
 
@@ -166,6 +166,93 @@ Return ONLY the description text, no JSON, no formatting, just the paragraph.`;
   } catch (error) {
     console.error('Error generating description with Gemini:', error.message);
     return '';
+  }
+};
+
+/**
+ * Generate product image URLs using Gemini AI
+ * @param {string} productTitle - The product title/name
+ * @returns {Promise<Array<string>>} Array of image URLs
+ */
+export const generateImagesWithGemini = async (productTitle) => {
+  checkGeminiKey();
+  const apiKey = getGeminiApiKey();
+  
+  if (!apiKey) {
+    console.error('GEMINI_API_KEY is not configured');
+    return [];
+  }
+
+  try {
+    const prompt = `You are an expert image search assistant. Your task is to find high-quality, publicly accessible image URLs for a product.
+
+Product Title: "${productTitle}"
+
+Find 5 realistic, high-resolution product images for this item. 
+CRITICAL: Use ONLY direct image links (ending in .jpg, .jpeg, .png, or .webp) from:
+1. Official manufacturer websites (e.g., apple.com, samsung.com, dell.com, sony.com).
+2. Reputable tech review sites (e.g., cnet.com, theverge.com).
+3. Major, stable e-commerce CDNs (e.g., m.media-amazon.com, images-na.ssl-images-amazon.com).
+4. Reliable stock photo sites if specific product shots are unavailable (e.g., unsplash.com).
+
+AVOID:
+- Temporary or dynamic links that expire (e.g., from search result caches).
+- Low-resolution thumbnails.
+- Watermarked images.
+
+Format your response as a single, valid JSON object with one key, "images", which contains an array of 5 string URLs.
+
+Example:
+{
+  "images": [
+    "https://m.media-amazon.com/images/I/71p-tHQ0u1L._AC_SL1500_.jpg",
+    "https://images.samsung.com/is/image/samsung/p6pim/p6/sm-s918/gallery/sm-s918-front-phantomblack-534863458.jpg",
+    "https://support.apple.com/library/content/dam/edam/applecare/images/en_US/iphone/iphone14pro/iphone-14-pro-colors.png"
+  ]
+}`;
+
+    const requestBody = {
+      contents: [{ parts: [{ text: prompt }] }],
+      generationConfig: {
+        temperature: 0.1, // Low temperature for factual, less creative results
+        maxOutputTokens: 1024
+      }
+    };
+
+    const response = await fetch(`${GEMINI_URL}?key=${apiKey}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(requestBody)
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(`Gemini API error for images: ${response.status} - ${JSON.stringify(errorData)}`);
+    }
+
+    const data = await response.json();
+    const responseText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+
+    if (!responseText) {
+      throw new Error('Invalid response structure from Gemini API for images');
+    }
+
+    const jsonMatch = responseText.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) {
+      console.warn('Could not extract JSON from Gemini image response. Raw text:', responseText);
+      return [];
+    }
+
+    const parsedResponse = JSON.parse(jsonMatch[0]);
+    if (Array.isArray(parsedResponse.images)) {
+      return parsedResponse.images.filter(url => typeof url === 'string' && url.startsWith('http'));
+    }
+
+    return [];
+
+  } catch (error) {
+    console.error('Error generating images with Gemini:', error.message);
+    return []; // Return empty on failure
   }
 };
 

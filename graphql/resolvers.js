@@ -100,8 +100,19 @@ export const resolvers = {
         try {
             parsedResponse = JSON.parse(cleanJson);
         } catch (e) {
-            console.error("[SERVER] Failed to parse AI JSON response:", cleanJson);
-            throw new Error("Invalid JSON format from AI");
+            // Fallback: try to find object in text
+            const jsonMatch = cleanJson.match(/\{[\s\S]*\}/);
+            if (jsonMatch) {
+                try {
+                    parsedResponse = JSON.parse(jsonMatch[0]);
+                } catch (_e) {
+                    console.error("[SERVER] Failed to parse AI JSON fallback response:", jsonMatch[0]);
+                }
+            }
+            if (!parsedResponse) {
+                console.error("[SERVER] Failed to parse AI JSON response:", cleanJson);
+                throw new Error("Invalid JSON format from AI");
+            }
         }
 
         let navigationTarget = parsedResponse.navigationTarget || null;

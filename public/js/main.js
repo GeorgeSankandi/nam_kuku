@@ -111,7 +111,12 @@ document.body.addEventListener('click', async (e) => {
                 alert('Product deleted');
                 location.reload();
             } catch (err) {
-                alert(`Delete failed: ${err.message}`);
+                if (err.message.includes('401')) {
+                    alert('Session expired. Please login again.');
+                    logout();
+                } else {
+                    alert(`Delete failed: ${err.message}`);
+                }
             }
         }
         return;
@@ -549,6 +554,18 @@ document.body.addEventListener('submit', async e => {
 
         const msgEl = document.getElementById('register-message');
         if (msgEl) msgEl.textContent = '';
+        
+        // Validate password requirements
+        const passwordValidation = validatePassword(password);
+        if (!passwordValidation.valid) {
+            if (msgEl) {
+                msgEl.textContent = passwordValidation.message;
+                msgEl.classList.remove('success');
+                msgEl.classList.add('error');
+            }
+            return;
+        }
+        
         try {
             const res = await api.sessionSignup(name, email, password, sellerType);
             
@@ -646,10 +663,15 @@ async function handleProductFormSubmit(e) {
     const category = form.elements['product-category'].value;
     const isClothes = ['clothes', 'clothing', 'womens-clothes', 'mens-clothes'].includes(category.toLowerCase());
 
-    // If creating a new clothes product, at least one image must be uploaded.
-    if (isClothes && !hiddenId && form.elements['product-images'].files.length === 0) {
-        alert('Error: You must upload at least one image when creating a new clothes product.');
-        return; // Stop the form submission
+    // For new products, ensure at least one image source exists (URL or uploaded)
+    if (!hiddenId) {
+        const hasMainImageUrl = form.elements['product-image'].value.trim() !== '';
+        const hasUploadedImages = form.elements['product-images'].files.length > 0;
+        
+        if (!hasMainImageUrl && !hasUploadedImages) {
+            alert('Error: You must provide at least one image via URL or upload when creating a new product.');
+            return; // Stop the form submission
+        }
     }
 
     const curatedPages = [
@@ -695,9 +717,9 @@ async function handleProductFormSubmit(e) {
     const sizeSelect = document.getElementById('product-sizes-select');
     const sizes = sizeSelect ? Array.from(sizeSelect.selectedOptions).map(opt => opt.value) : [];
 
-    // For clothes products, ignore URL fields. For others, use them.
-    const mainImageUrl = isClothes ? '' : form.elements['product-image'].value;
-    const carouselUrls = isClothes ? [] : [
+    // For all products, can use URL fields. Uploaded images can override/supplement these.
+    const mainImageUrl = form.elements['product-image'].value;
+    const carouselUrls = [
         form.elements['carousel-url-1']?.value,
         form.elements['carousel-url-2']?.value,
         form.elements['carousel-url-3']?.value,
@@ -781,15 +803,9 @@ async function handleProductFormSubmit(e) {
         }
         
         if (filePaths.length > 0) {
-            if (isClothes) {
-                // For clothes, uploaded images are the ONLY source of truth.
-                productData.image = filePaths[0]; // First uploaded is the main image.
-                productData.thumbnails = [...filePaths]; // All uploaded are thumbnails.
-            } else {
-                // For other products, uploaded images are added to any existing URLs.
-                if (!productData.image) productData.image = filePaths[0];
-                productData.thumbnails = [...filePaths, ...productData.thumbnails];
-            }
+            // Uploaded images: if main image not set, use first uploaded; then prepend all to thumbnails
+            if (!productData.image) productData.image = filePaths[0];
+            productData.thumbnails = [...filePaths, ...productData.thumbnails];
         }
     }
 
@@ -830,11 +846,54 @@ async function handleProductFormSubmit(e) {
         }
         location.reload();
     } catch (err) {
+        // --- ERROR HANDLING FOR 401 UNAUTHORIZED ---
+        if (err.message && err.message.includes('401')) {
+            alert('Your session has expired or the token is invalid. Please log in again.');
+            logout(); // Clear localStorage and redirect
+            return;
+        }
+        
         alert(`Error saving product: ${err.message}`);
         console.error("Error saving product:", err);
     }
 }
 
+
+// Password validation helper
+function validatePassword(password) {
+    const minLength = 8;
+    const minCapitalLetters = 1;
+    const minNumbers = 2;
+    
+    const capitalLetterCount = (password.match(/[A-Z]/g) || []).length;
+    const numberCount = (password.match(/[0-9]/g) || []).length;
+    
+    if (password.length < minLength) {
+        return {
+            valid: false,
+            message: `❌ Password must contain at least ${minLength} characters. Current: ${password.length} characters.`
+        };
+    }
+    
+    if (capitalLetterCount < minCapitalLetters) {
+        return {
+            valid: false,
+            message: `❌ Password must contain at least ${minCapitalLetters} capital letter(s). Current: ${capitalLetterCount} capital letter(s).`
+        };
+    }
+    
+    if (numberCount < minNumbers) {
+        return {
+            valid: false,
+            message: `❌ Password must contain at least ${minNumbers} number(s). Current: ${numberCount} number(s).`
+        };
+    }
+    
+    return {
+        valid: true,
+        message: '✓ Password meets all requirements.'
+    };
+}
 
 // --- Search Input ---
 const searchInput = document.getElementById('search-input');

@@ -88,18 +88,27 @@ function speakText(text) {
 
     const utterance = new SpeechSynthesisUtterance(text);
 
-    // A prioritized list of known high-quality female voice names across platforms.
+    // A comprehensive list of known high-quality female voice names across platforms.
     // The more specific, higher-quality names are first.
     const priorityFemaleVoiceNames = [
         'Google UK English Female', // Google Chrome (Desktop)
         'Samantha',                 // Apple (macOS/iOS - high quality)
         'Microsoft Zira Desktop - English (United States)', // Microsoft Edge/Windows
+        'Microsoft Zira Mobile - English (United States)', // Microsoft Edge/Windows Mobile
         'Tessa',                    // Apple (macOS/iOS)
         'Karen',                    // Apple (macOS/iOS)
         'Moira',                    // Apple (macOS/iOS)
         'Susan',                    // Older Microsoft
         'Hazel',                    // Older Microsoft
-        'Google US English'         // This can be female on some systems, so it's a lower priority option.
+        'Google US English',        // This can be female on some systems
+        'Alex',                     // Sometimes female on some systems
+        'Victoria',                 // Microsoft
+        'Zira',                     // Microsoft
+        'Aria',                     // Microsoft
+        'Jenny',                    // Microsoft Azure voices
+        'AriaRUS',                  // Microsoft
+        'ZiraRUS',                  // Microsoft
+        'Female'                    // Generic fallback
     ];
 
     let selectedVoice = null;
@@ -113,21 +122,34 @@ function speakText(text) {
         }
     }
 
-    // 2. If no priority voice was found, fall back to searching for any English voice
-    // that explicitly identifies as "Female".
+    // 2. If no priority voice was found, search for any English voice that contains female-related keywords
     if (!selectedVoice) {
-        selectedVoice = availableVoices.find(voice => voice.lang.startsWith('en') && voice.name.includes('Female'));
+        const femaleKeywords = ['Female', 'Woman', 'Girl', 'Lady', 'Zira', 'Samantha', 'Karen', 'Tessa', 'Moira', 'Susan', 'Hazel', 'Victoria', 'Aria', 'Jenny'];
+        for (const keyword of femaleKeywords) {
+            const voice = availableVoices.find(v => v.lang.startsWith('en') && v.name.includes(keyword));
+            if (voice) {
+                selectedVoice = voice;
+                break;
+            }
+        }
     }
 
-    // 3. If a suitable voice was found, assign it. Otherwise, the browser will use its default.
+    // 3. If still no voice found, try any English voice (some systems may not label them as female)
+    if (!selectedVoice) {
+        selectedVoice = availableVoices.find(voice => voice.lang.startsWith('en'));
+    }
+
+    // 4. If a suitable voice was found, assign it. Otherwise, the browser will use its default.
     if (selectedVoice) {
         utterance.voice = selectedVoice;
+        console.log(`TTS: Using voice "${selectedVoice.name}" (${selectedVoice.lang})`);
     } else {
-        console.warn("TTS: No specific female voice found. Using browser default.");
+        console.warn("TTS: No suitable voice found. Using browser default.");
     }
 
     utterance.rate = 1; // Speed
-    utterance.pitch = 1; // Pitch
+    utterance.pitch = 1.1; // Slightly higher pitch for more feminine sound
+    utterance.volume = 1; // Volume
 
     window.speechSynthesis.speak(utterance);
 }
